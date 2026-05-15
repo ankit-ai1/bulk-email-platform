@@ -6,7 +6,7 @@ import { Plus, FileText, Trash2, X, Eye, Pencil, Code, Search } from 'lucide-rea
 import { format } from 'date-fns'
 
 export default function TemplatesPage() {
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const [templates, setTemplates] = useState([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -16,7 +16,7 @@ export default function TemplatesPage() {
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState({ name: '', subject: '', body: '', is_html: false })
 
-  useEffect(() => { loadTemplates() }, [])
+  useEffect(() => { if (user) loadTemplates() }, [user])
 
   async function loadTemplates() {
     setLoading(true)

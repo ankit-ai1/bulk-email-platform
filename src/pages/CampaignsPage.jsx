@@ -10,7 +10,7 @@ const STATUS_MAP = {
 }
 
 export default function CampaignsPage() {
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const [campaigns, setCampaigns] = useState([])
   const [templates, setTemplates] = useState([])
   const [contactLists, setContactLists] = useState([])
@@ -23,7 +23,7 @@ export default function CampaignsPage() {
   const [saving, setSaving] = useState(false)
   const [launching, setLaunching] = useState(false)
 
-  useEffect(() => { loadAll() }, [])
+  useEffect(() => { if (user) loadAll() }, [user])
 
   async function loadAll() {
     setLoading(true)

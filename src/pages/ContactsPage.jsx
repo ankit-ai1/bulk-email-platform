@@ -8,7 +8,7 @@ import { Upload, Users, Plus, Trash2, X, FileSpreadsheet, Search, ChevronDown, C
 import { format } from 'date-fns'
 
 export default function ContactsPage() {
-  const { user } = useAuth()
+  const { user, loading: authLoading } = useAuth()
   const [lists, setLists] = useState([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -21,7 +21,7 @@ export default function ContactsPage() {
   const [fileName, setFileName] = useState('')
   const fileRef = useRef()
 
-  useEffect(() => { loadLists() }, [])
+  useEffect(() => { if (user) loadLists() }, [user])
 
   async function loadLists() {
     setLoading(true)
