@@ -17,6 +17,7 @@ export default function CampaignsPage() {
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [showLaunchModal, setShowLaunchModal] = useState(null)
+  const [viewCampaign, setViewCampaign] = useState(null)
   const [search, setSearch] = useState('')
   const [form, setForm] = useState({ name: '', subject: '', template_id: '', list_id: '', from_name: '', from_email: '' })
   const [saving, setSaving] = useState(false)
@@ -143,7 +144,8 @@ export default function CampaignsPage() {
                       <Play size={13} /> Launch
                     </button>
                   )}
-                  <button className="btn btn-secondary btn-sm" style={{ justifyContent: 'center', flex: c.status !== 'draft' ? 1 : 0 }}>
+                  <button className="btn btn-secondary btn-sm" style={{ justifyContent: 'center', flex: c.status !== 'draft' ? 1 : 0 }}
+                    onClick={() => setViewCampaign(c)}>
                     <Eye size={13} /> View
                   </button>
                   <button className="btn btn-danger btn-sm" onClick={() => handleDelete(c.id)}>
@@ -248,6 +250,89 @@ export default function CampaignsPage() {
           </div>
         </div>
       )}
+
+      {/* View Campaign Modal */}
+      {viewCampaign && (
+        <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setViewCampaign(null)}>
+          <div className="modal" style={{ maxWidth: '520px' }}>
+            <div className="modal-header">
+              <h2 className="modal-title">Campaign Details</h2>
+              <button className="btn btn-ghost btn-sm" onClick={() => setViewCampaign(null)} style={{ padding: '6px' }}><X size={18} /></button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <div>
+                <label style={{ fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Campaign Name</label>
+                <p style={{ fontSize: '15px', color: 'var(--text-primary)', fontWeight: 500 }}>{viewCampaign.name}</p>
+              </div>
+              <div>
+                <label style={{ fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Status</label>
+                <span className={`badge badge-${STATUS_MAP[viewCampaign.status] || 'neutral'}`} style={{ textTransform: 'capitalize' }}>{viewCampaign.status}</span>
+              </div>
+              <div>
+                <label style={{ fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Email Subject</label>
+                <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>{viewCampaign.subject || '—'}</p>
+              </div>
+              <div className="grid-2">
+                <div>
+                  <label style={{ fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Sender Name</label>
+                  <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>{viewCampaign.from_name || '—'}</p>
+                </div>
+                <div>
+                  <label style={{ fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Sender Email</label>
+                  <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>{viewCampaign.from_email || '—'}</p>
+                </div>
+              </div>
+              {(() => {
+                const selectedTemplate = templates.find(t => t.id === viewCampaign.template_id)
+                const selectedList = contactLists.find(l => l.id === viewCampaign.list_id)
+                return (
+                  <>
+                    {selectedTemplate && (
+                      <div>
+                        <label style={{ fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Template</label>
+                        <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>{selectedTemplate.name}</p>
+                      </div>
+                    )}
+                    {selectedList && (
+                      <div>
+                        <label style={{ fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Contact List</label>
+                        <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>{selectedList.name} ({selectedList.total_contacts} contacts)</p>
+                      </div>
+                    )}
+                  </>
+                )
+              })()}
+              <div className="grid-3">
+                <div>
+                  <label style={{ fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Total Recipients</label>
+                  <p style={{ fontSize: '16px', color: 'var(--text-primary)', fontWeight: 600 }}>{viewCampaign.total_recipients || 0}</p>
+                </div>
+                <div>
+                  <label style={{ fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Sent</label>
+                  <p style={{ fontSize: '16px', color: '#43e97b', fontWeight: 600 }}>{viewCampaign.sent_count || 0}</p>
+                </div>
+                <div>
+                  <label style={{ fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Failed</label>
+                  <p style={{ fontSize: '16px', color: '#ff6b6b', fontWeight: 600 }}>{viewCampaign.failed_count || 0}</p>
+                </div>
+              </div>
+              <div>
+                <label style={{ fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Created</label>
+                <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>{format(new Date(viewCampaign.created_at), 'MMM d, yyyy • h:mm a')}</p>
+              </div>
+              <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+                <button className="btn btn-secondary" onClick={() => setViewCampaign(null)}>Close</button>
+                {viewCampaign.status === 'draft' && (
+                  <button className="btn btn-primary" onClick={() => { setViewCampaign(null); setShowLaunchModal(viewCampaign) }}>
+                    <Play size={15} /> Launch Campaign
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
+

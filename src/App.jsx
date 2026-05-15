@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider, useAuth } from './hooks/useAuth'
+import { ThemeProvider } from './hooks/useTheme'
 import Layout from './components/shared/Layout'
 import LoginPage from './pages/LoginPage'
 import DashboardPage from './pages/DashboardPage'
@@ -57,6 +58,7 @@ function AppRoutes() {
 
 export default function App() {
   return (
+    <ThemeProvider>
     <AuthProvider>
       <BrowserRouter>
         <AppRoutes />
@@ -77,5 +79,6 @@ export default function App() {
         />
       </BrowserRouter>
     </AuthProvider>
+    </ThemeProvider>
   )
 }

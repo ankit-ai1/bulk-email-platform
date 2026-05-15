@@ -3,9 +3,10 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import {
   LayoutDashboard, Send, Users, FileText, BarChart3,
-  Settings, LogOut, Menu, X, ChevronRight, Zap
+  Settings, LogOut, Menu, X, ChevronRight, Zap, Sun, Moon
 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { useTheme } from '../../hooks/useTheme'
 
 const navItems = [
   { to: '/', icon: LayoutDashboard, label: 'Dashboard', exact: true },
@@ -18,6 +19,7 @@ const navItems = [
 
 export default function Layout() {
   const { user, signOut } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const navigate = useNavigate()
   const [mobileOpen, setMobileOpen] = useState(false)
 
@@ -149,6 +151,14 @@ export default function Layout() {
               </div>
             </div>
           </div>
+          <button
+            onClick={toggleTheme}
+            className="btn btn-ghost btn-sm"
+            style={{ width: '100%', justifyContent: 'center', color: 'var(--text-muted)', marginBottom: '6px' }}
+          >
+            {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
+            {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
+          </button>
           <button
             onClick={handleSignOut}
             className="btn btn-ghost btn-sm"

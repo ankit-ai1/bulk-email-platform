@@ -119,6 +119,33 @@ export default function ContactsPage() {
     else { toast.success('List deleted'); loadLists() }
   }
 
+  function downloadSampleTemplate() {
+    // Create sample data
+    const sampleData = [
+      { name: 'John Smith', email: 'john.smith@example.com' },
+      { name: 'Jane Doe', email: 'jane.doe@example.com' },
+      { name: 'Michael Johnson', email: 'michael.j@example.com' },
+      { name: 'Sarah Williams', email: 'sarah.w@example.com' },
+      { name: 'David Brown', email: 'david.brown@example.com' }
+    ]
+
+    // Create workbook and worksheet
+    const ws = XLSX.utils.json_to_sheet(sampleData)
+    
+    // Set column widths
+    ws['!cols'] = [
+      { wch: 20 }, // name column
+      { wch: 30 }  // email column
+    ]
+
+    const wb = XLSX.utils.book_new()
+    XLSX.utils.book_append_sheet(wb, ws, 'Contacts')
+
+    // Download
+    XLSX.writeFile(wb, 'sample_contacts_template.xlsx')
+    toast.success('Sample template downloaded!')
+  }
+
   const filtered = lists.filter(l => l.name?.toLowerCase().includes(search.toLowerCase()))
 
   return (
@@ -239,6 +266,17 @@ export default function ContactsPage() {
 
               <div className="input-group">
                 <label className="input-label">Upload File (CSV or Excel) *</label>
+                <div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}>
+                  <button
+                    type="button"
+                    onClick={downloadSampleTemplate}
+                    className="btn btn-secondary btn-sm"
+                    style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                  >
+                    <FileSpreadsheet size={14} />
+                    Download Sample Template
+                  </button>
+                </div>
                 <div
                   onClick={() => fileRef.current?.click()}
                   style={{

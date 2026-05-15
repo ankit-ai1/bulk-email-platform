@@ -1,10 +1,6 @@
-// Supabase is replaced by mock auth — this stub prevents import errors
-export const supabase = {
-  auth: {
-    getSession: async () => ({ data: { session: null } }),
-    onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
-    signInWithPassword: async () => ({ data: null, error: { message: 'Use mock auth' } }),
-    signUp: async () => ({ data: null, error: { message: 'Use mock auth' } }),
-    signOut: async () => {},
-  },
-}
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)

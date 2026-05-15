@@ -1,60 +1,41 @@
 import { createContext, useContext, useEffect, useState } from 'react'
+import { supabase } from '../lib/supabase'
 
 const AuthContext = createContext({})
-
-const DUMMY_USERS = [
-  {
-    email: 'admin@mailforge.com',
-    password: 'password123',
-    user_metadata: { full_name: 'Admin User' },
-  },
-  {
-    email: 'test@example.com',
-    password: 'password123',
-    user_metadata: { full_name: 'Test User' },
-  },
-]
-
-const STORAGE_KEY = 'mock_auth_user'
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored) setUser(JSON.parse(stored))
-    setLoading(false)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null)
+      setLoading(false)
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    return () => subscription.unsubscribe()
   }, [])
 
   const signIn = async (email, password) => {
-    const match = DUMMY_USERS.find(
-      (u) => u.email === email && u.password === password
-    )
-    if (!match) {
-      return { data: null, error: { message: 'Invalid email or password.' } }
-    }
-    const userObj = { email: match.email, user_metadata: match.user_metadata }
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(userObj))
-    setUser(userObj)
-    return { data: { user: userObj }, error: null }
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    return { data, error }
   }
 
   const signUp = async (email, password, fullName) => {
-    const exists = DUMMY_USERS.find((u) => u.email === email)
-    if (exists) {
-      return { data: null, error: { message: 'User already exists.' } }
-    }
-    const userObj = { email, user_metadata: { full_name: fullName } }
-    DUMMY_USERS.push({ email, password, user_metadata: { full_name: fullName } })
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(userObj))
-    setUser(userObj)
-    return { data: { user: userObj }, error: null }
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { full_name: fullName } }
+    })
+    return { data, error }
   }
 
   const signOut = async () => {
-    localStorage.removeItem(STORAGE_KEY)
-    setUser(null)
+    await supabase.auth.signOut()
   }
 
   return (
