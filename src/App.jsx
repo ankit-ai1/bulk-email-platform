@@ -1,0 +1,81 @@
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { Toaster } from 'react-hot-toast'
+import { AuthProvider, useAuth } from './hooks/useAuth'
+import Layout from './components/shared/Layout'
+import LoginPage from './pages/LoginPage'
+import DashboardPage from './pages/DashboardPage'
+import CampaignsPage from './pages/CampaignsPage'
+import ContactsPage from './pages/ContactsPage'
+import TemplatesPage from './pages/TemplatesPage'
+import LogsPage from './pages/LogsPage'
+import SettingsPage from './pages/SettingsPage'
+
+function ProtectedRoute({ children }) {
+  const { user, loading } = useAuth()
+  if (loading) return <LoadingScreen />
+  if (!user) return <Navigate to="/login" replace />
+  return children
+}
+
+function LoadingScreen() {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      height: '100vh', background: 'var(--bg-primary)', flexDirection: 'column', gap: '16px'
+    }}>
+      <div style={{
+        width: '48px', height: '48px', borderRadius: '14px',
+        background: 'linear-gradient(135deg, #6c63ff, #a78bfa)',
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        fontSize: '24px', animation: 'pulse 1.5s ease infinite'
+      }}>✉</div>
+      <div className="spinner" style={{ width: '24px', height: '24px' }} />
+    </div>
+  )
+}
+
+function AppRoutes() {
+  const { user } = useAuth()
+  return (
+    <Routes>
+      <Route path="/login" element={user ? <Navigate to="/" replace /> : <LoginPage />} />
+      <Route path="/" element={
+        <ProtectedRoute>
+          <Layout />
+        </ProtectedRoute>
+      }>
+        <Route index element={<DashboardPage />} />
+        <Route path="campaigns" element={<CampaignsPage />} />
+        <Route path="contacts" element={<ContactsPage />} />
+        <Route path="templates" element={<TemplatesPage />} />
+        <Route path="logs" element={<LogsPage />} />
+        <Route path="settings" element={<SettingsPage />} />
+      </Route>
+    </Routes>
+  )
+}
+
+export default function App() {
+  return (
+    <AuthProvider>
+      <BrowserRouter>
+        <AppRoutes />
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            style: {
+              background: 'var(--bg-elevated)',
+              color: 'var(--text-primary)',
+              border: '1px solid var(--border)',
+              fontFamily: 'var(--font-body)',
+              fontSize: '14px',
+              borderRadius: '10px',
+            },
+            success: { iconTheme: { primary: '#43e97b', secondary: 'white' } },
+            error: { iconTheme: { primary: '#ff6584', secondary: 'white' } },
+          }}
+        />
+      </BrowserRouter>
+    </AuthProvider>
+  )
+}
