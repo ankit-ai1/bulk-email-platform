@@ -1,5 +1,6 @@
 import 'dotenv/config';
 import { processCampaigns } from './campaignProcessor.js';
+import { startHttpServer } from './httpServer.js';
 
 const POLL_INTERVAL = parseInt(process.env.POLL_INTERVAL) || 10000;
 
@@ -32,6 +33,7 @@ function validateEnv() {
 }
 
 validateEnv();
+startHttpServer();
 
 console.log('[Worker] Email worker started');
 console.log(`[Worker] Poll interval: ${POLL_INTERVAL}ms | Batch size: ${process.env.BATCH_SIZE || 100} | Batch delay: ${process.env.DELAY_BETWEEN_BATCHES || 2000}ms`);

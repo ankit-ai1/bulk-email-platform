@@ -2,15 +2,17 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import toast from 'react-hot-toast'
-import { Plus, Send, Trash2, X, Play, Eye, Search } from 'lucide-react'
+import { Plus, Send, Trash2, X, Play, Eye, Search, Users } from 'lucide-react'
 import { format } from 'date-fns'
 
 const STATUS_MAP = {
   draft: 'neutral', sending: 'info', completed: 'success', failed: 'error', paused: 'warning'
 }
 
+const EMPTY_FORM = { name: '', subject: '', template_id: '', list_ids: [], from_name: '', from_email: '' }
+
 export default function CampaignsPage() {
-  const { user, loading: authLoading } = useAuth()
+  const { user } = useAuth()
   const [campaigns, setCampaigns] = useState([])
   const [templates, setTemplates] = useState([])
   const [contactLists, setContactLists] = useState([])
@@ -19,7 +21,7 @@ export default function CampaignsPage() {
   const [showLaunchModal, setShowLaunchModal] = useState(null)
   const [viewCampaign, setViewCampaign] = useState(null)
   const [search, setSearch] = useState('')
-  const [form, setForm] = useState({ name: '', subject: '', template_id: '', list_id: '', from_name: '', from_email: '' })
+  const [form, setForm] = useState(EMPTY_FORM)
   const [saving, setSaving] = useState(false)
   const [launching, setLaunching] = useState(false)
 
@@ -38,14 +40,48 @@ export default function CampaignsPage() {
     setLoading(false)
   }
 
+  function toggleList(listId) {
+    setForm(f => ({
+      ...f,
+      list_ids: f.list_ids.includes(listId)
+        ? f.list_ids.filter(id => id !== listId)
+        : [...f.list_ids, listId],
+    }))
+  }
+
+  // Total contacts across all selected lists
+  function totalSelectedContacts(listIds) {
+    return contactLists
+      .filter(l => listIds.includes(l.id))
+      .reduce((sum, l) => sum + (l.total_contacts || 0), 0)
+  }
+
+  // Resolve list IDs for a campaign (supports both old list_id and new list_ids)
+  function getCampaignListIds(campaign) {
+    if (campaign.list_ids?.length > 0) return campaign.list_ids
+    if (campaign.list_id) return [campaign.list_id]
+    return []
+  }
+
   async function handleCreate(e) {
     e.preventDefault()
+    if (form.list_ids.length === 0) { toast.error('Select at least one contact list'); return }
     setSaving(true)
+    const { list_ids, ...rest } = form
     const { error } = await supabase.from('campaigns').insert({
-      ...form, user_id: user.id, status: 'draft'
+      ...rest,
+      list_ids,
+      list_id: list_ids[0],   // keep for backward compatibility with worker
+      user_id: user.id,
+      status: 'draft',
     })
     if (error) toast.error(error.message)
-    else { toast.success('Campaign created!'); setShowModal(false); setForm({ name: '', subject: '', template_id: '', list_id: '', from_name: '', from_email: '' }); loadAll() }
+    else {
+      toast.success('Campaign created!')
+      setShowModal(false)
+      setForm(EMPTY_FORM)
+      loadAll()
+    }
     setSaving(false)
   }
 
@@ -58,12 +94,11 @@ export default function CampaignsPage() {
 
   async function handleLaunch(campaign) {
     setLaunching(true)
-    // Update status to sending
-    const { error } = await supabase.from('campaigns').update({ status: 'sending', launched_at: new Date().toISOString() }).eq('id', campaign.id)
+    const { error } = await supabase.from('campaigns')
+      .update({ status: 'sending', launched_at: new Date().toISOString() })
+      .eq('id', campaign.id)
     if (error) { toast.error(error.message); setLaunching(false); return }
-
-    // Simulate sending (in real app, this triggers your worker service)
-    toast.success('Campaign launched! Emails are being queued for delivery.', { duration: 5000 })
+    toast.success('Campaign launched! Emails are being sent.', { duration: 5000 })
     setShowLaunchModal(null)
     setLaunching(false)
     loadAll()
@@ -86,16 +121,15 @@ export default function CampaignsPage() {
       {/* Search */}
       <div style={{ position: 'relative', marginBottom: '24px', maxWidth: '360px' }}>
         <Search size={16} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-        <input
-          className="input" placeholder="Search campaigns..."
-          value={search} onChange={e => setSearch(e.target.value)}
-          style={{ paddingLeft: '40px' }}
-        />
+        <input className="input" placeholder="Search campaigns..." value={search}
+          onChange={e => setSearch(e.target.value)} style={{ paddingLeft: '40px' }} />
       </div>
 
       {/* Campaigns grid */}
       {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', padding: '64px' }}><div className="spinner" style={{ width: '32px', height: '32px' }} /></div>
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '64px' }}>
+          <div className="spinner" style={{ width: '32px', height: '32px' }} />
+        </div>
       ) : filtered.length === 0 ? (
         <div className="card">
           <div className="empty-state">
@@ -108,7 +142,9 @@ export default function CampaignsPage() {
       ) : (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '16px' }}>
           {filtered.map(c => {
-            const list = contactLists.find(l => l.id === c.list_id)
+            const listIds = getCampaignListIds(c)
+            const lists = contactLists.filter(l => listIds.includes(l.id))
+            const total = lists.reduce((s, l) => s + (l.total_contacts || 0), 0)
             return (
               <div key={c.id} className="card" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
@@ -125,9 +161,15 @@ export default function CampaignsPage() {
                       From: <span style={{ color: 'var(--text-secondary)' }}>{c.from_name} &lt;{c.from_email}&gt;</span>
                     </div>
                   )}
-                  {list && (
+                  {lists.length > 0 && (
                     <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-                      List: <span style={{ color: 'var(--text-secondary)' }}>{list.name} ({list.total_contacts || 0} contacts)</span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
+                        <Users size={11} />
+                        {lists.length === 1
+                          ? <span style={{ color: 'var(--text-secondary)' }}>{lists[0].name} ({total} contacts)</span>
+                          : <span style={{ color: 'var(--text-secondary)' }}>{lists.length} lists · {total} contacts total</span>
+                        }
+                      </span>
                     </div>
                   )}
                   <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
@@ -144,7 +186,8 @@ export default function CampaignsPage() {
                       <Play size={13} /> Launch
                     </button>
                   )}
-                  <button className="btn btn-secondary btn-sm" style={{ justifyContent: 'center', flex: c.status !== 'draft' ? 1 : 0 }}
+                  <button className="btn btn-secondary btn-sm"
+                    style={{ justifyContent: 'center', flex: c.status !== 'draft' ? 1 : 0 }}
                     onClick={() => setViewCampaign(c)}>
                     <Eye size={13} /> View
                   </button>
@@ -158,7 +201,7 @@ export default function CampaignsPage() {
         </div>
       )}
 
-      {/* Create Modal */}
+      {/* ── CREATE MODAL ── */}
       {showModal && (
         <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setShowModal(false)}>
           <div className="modal" style={{ maxWidth: '600px' }}>
@@ -176,7 +219,7 @@ export default function CampaignsPage() {
               </div>
               <div className="input-group">
                 <label className="input-label">Email Subject Line *</label>
-                <input className="input" placeholder="e.g. Exclusive offer just for you 🎉" value={form.subject}
+                <input className="input" placeholder="e.g. Exclusive offer just for you" value={form.subject}
                   onChange={e => setForm({ ...form, subject: e.target.value })} required />
               </div>
               <div className="grid-2">
@@ -199,14 +242,69 @@ export default function CampaignsPage() {
                   {templates.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
                 </select>
               </div>
+
+              {/* Multi-select contact lists */}
               <div className="input-group">
-                <label className="input-label">Contact List</label>
-                <select className="input" value={form.list_id}
-                  onChange={e => setForm({ ...form, list_id: e.target.value })}>
-                  <option value="">Select a contact list</option>
-                  {contactLists.map(l => <option key={l.id} value={l.id}>{l.name} ({l.total_contacts || 0} contacts)</option>)}
-                </select>
+                <label className="input-label">Contact Lists *</label>
+
+                {/* Selected list tags */}
+                {form.list_ids.length > 0 && (
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginBottom: '10px' }}>
+                    {contactLists.filter(l => form.list_ids.includes(l.id)).map(l => (
+                      <div key={l.id} style={{
+                        display: 'flex', alignItems: 'center', gap: '6px',
+                        padding: '5px 10px', borderRadius: '20px',
+                        background: 'rgba(108,99,255,0.12)', border: '1px solid rgba(108,99,255,0.3)',
+                        fontSize: '12px', color: 'var(--text-primary)',
+                      }}>
+                        <Users size={11} color="var(--accent)" />
+                        <span>{l.name}</span>
+                        <span style={{ color: 'var(--text-muted)' }}>· {l.total_contacts || 0}</span>
+                        <button type="button" onClick={() => toggleList(l.id)} style={{
+                          background: 'none', border: 'none', cursor: 'pointer',
+                          color: 'var(--text-muted)', padding: '0 0 0 2px', lineHeight: 1,
+                          fontSize: '14px', display: 'flex', alignItems: 'center',
+                        }}>×</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Dropdown showing only unselected lists */}
+                {contactLists.filter(l => !form.list_ids.includes(l.id)).length > 0 ? (
+                  <select className="input" value=""
+                    onChange={e => { if (e.target.value) toggleList(e.target.value) }}>
+                    <option value="">
+                      {form.list_ids.length === 0 ? 'Select a contact list' : '+ Add another list'}
+                    </option>
+                    {contactLists.filter(l => !form.list_ids.includes(l.id)).map(l => (
+                      <option key={l.id} value={l.id}>{l.name} ({l.total_contacts || 0} contacts)</option>
+                    ))}
+                  </select>
+                ) : contactLists.length === 0 ? (
+                  <div style={{
+                    padding: '12px 14px', borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--border)', fontSize: '13px', color: 'var(--text-muted)',
+                  }}>
+                    No contact lists yet — create one in the Contacts page
+                  </div>
+                ) : (
+                  <div style={{ fontSize: '12px', color: 'var(--text-muted)', padding: '4px 0' }}>
+                    All lists added
+                  </div>
+                )}
+
+                {form.list_ids.length > 0 && (
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: '6px', marginTop: '8px',
+                    fontSize: '12px', color: 'var(--text-secondary)',
+                  }}>
+                    <Users size={12} color="var(--accent)" />
+                    <strong style={{ color: 'var(--accent)' }}>{totalSelectedContacts(form.list_ids)}</strong> total contacts across {form.list_ids.length} list{form.list_ids.length > 1 ? 's' : ''}
+                  </div>
+                )}
               </div>
+
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '8px' }}>
                 <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancel</button>
                 <button type="submit" className="btn btn-primary" disabled={saving}>
@@ -218,7 +316,7 @@ export default function CampaignsPage() {
         </div>
       )}
 
-      {/* Launch confirmation modal */}
+      {/* ── LAUNCH MODAL ── */}
       {showLaunchModal && (
         <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setShowLaunchModal(null)}>
           <div className="modal" style={{ maxWidth: '460px' }}>
@@ -227,7 +325,7 @@ export default function CampaignsPage() {
                 width: '64px', height: '64px', borderRadius: '18px',
                 background: 'rgba(108,99,255,0.15)', display: 'flex',
                 alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px',
-                border: '1px solid rgba(108,99,255,0.3)'
+                border: '1px solid rgba(108,99,255,0.3)',
               }}>
                 <Send size={28} color="var(--accent)" />
               </div>
@@ -237,8 +335,18 @@ export default function CampaignsPage() {
               <p style={{ color: 'var(--text-secondary)', fontSize: '14px', marginBottom: '8px' }}>
                 You're about to launch <strong style={{ color: 'var(--text-primary)' }}>{showLaunchModal.name}</strong>
               </p>
+              {(() => {
+                const listIds = getCampaignListIds(showLaunchModal)
+                const lists = contactLists.filter(l => listIds.includes(l.id))
+                const total = lists.reduce((s, l) => s + (l.total_contacts || 0), 0)
+                return total > 0 ? (
+                  <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginBottom: '8px' }}>
+                    Sending to <strong style={{ color: 'var(--text-primary)' }}>{total} contacts</strong> across {lists.length} list{lists.length > 1 ? 's' : ''}
+                  </p>
+                ) : null
+              })()}
               <p style={{ color: 'var(--text-muted)', fontSize: '13px', marginBottom: '28px' }}>
-                This will start sending emails to all contacts in the selected list. This action cannot be undone.
+                This action cannot be undone.
               </p>
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
                 <button className="btn btn-secondary" onClick={() => setShowLaunchModal(null)}>Cancel</button>
@@ -251,7 +359,7 @@ export default function CampaignsPage() {
         </div>
       )}
 
-      {/* View Campaign Modal */}
+      {/* ── VIEW MODAL ── */}
       {viewCampaign && (
         <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setViewCampaign(null)}>
           <div className="modal" style={{ maxWidth: '520px' }}>
@@ -284,7 +392,9 @@ export default function CampaignsPage() {
               </div>
               {(() => {
                 const selectedTemplate = templates.find(t => t.id === viewCampaign.template_id)
-                const selectedList = contactLists.find(l => l.id === viewCampaign.list_id)
+                const listIds = getCampaignListIds(viewCampaign)
+                const lists = contactLists.filter(l => listIds.includes(l.id))
+                const total = lists.reduce((s, l) => s + (l.total_contacts || 0), 0)
                 return (
                   <>
                     {selectedTemplate && (
@@ -293,10 +403,23 @@ export default function CampaignsPage() {
                         <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>{selectedTemplate.name}</p>
                       </div>
                     )}
-                    {selectedList && (
+                    {lists.length > 0 && (
                       <div>
-                        <label style={{ fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600, display: 'block', marginBottom: '4px' }}>Contact List</label>
-                        <p style={{ fontSize: '14px', color: 'var(--text-secondary)' }}>{selectedList.name} ({selectedList.total_contacts} contacts)</p>
+                        <label style={{ fontSize: '12px', color: 'var(--text-muted)', textTransform: 'uppercase', fontWeight: 600, display: 'block', marginBottom: '8px' }}>
+                          Contact Lists ({total} total)
+                        </label>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                          {lists.map(l => (
+                            <div key={l.id} style={{
+                              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                              padding: '8px 12px', background: 'var(--bg-elevated)',
+                              borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
+                            }}>
+                              <span style={{ fontSize: '13px', color: 'var(--text-primary)', fontWeight: 500 }}>{l.name}</span>
+                              <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{l.total_contacts || 0} contacts</span>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </>
@@ -335,4 +458,3 @@ export default function CampaignsPage() {
     </div>
   )
 }
-

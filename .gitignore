@@ -3,7 +3,11 @@ dist/
 .env
 .env.local
 .env.*.local
-.DS_Store
+.env.production
+.env.development
+.env.staging
+worker/.env
+DS_Store
 *.log
 
 # Supabase

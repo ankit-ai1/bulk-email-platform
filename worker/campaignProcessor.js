@@ -47,7 +47,18 @@ async function processCampaign(campaign) {
       return;
     }
 
-    const contacts = await fetchContacts(campaign.list_id);
+    // Support both new multi-list (list_ids) and legacy single-list (list_id)
+    const listIds = Array.isArray(campaign.list_ids) && campaign.list_ids.length > 0
+      ? campaign.list_ids
+      : campaign.list_id ? [campaign.list_id] : [];
+
+    if (listIds.length === 0) {
+      console.log(`[Processor] No contact lists on campaign ${campaign.id} — marking completed`);
+      await updateCampaignStatus(campaign.id, 'completed');
+      return;
+    }
+
+    const contacts = await fetchContacts(listIds);
     if (!contacts || contacts.length === 0) {
       console.log(`[Processor] No active contacts for campaign ${campaign.id} — marking completed`);
       await updateCampaignStatus(campaign.id, 'completed');
@@ -154,11 +165,11 @@ async function fetchTemplate(templateId) {
   return data;
 }
 
-async function fetchContacts(listId) {
+async function fetchContacts(listIds) {
   const { data, error } = await supabase
     .from('contacts')
     .select('*')
-    .eq('list_id', listId)
+    .in('list_id', listIds)
     .eq('status', 'active');
 
   if (error) {
