@@ -22,13 +22,15 @@ function sendResponse(res, statusCode, data) {
 
 export function startHttpServer() {
   const server = http.createServer(async (req, res) => {
-    // Set CORS headers for all responses
-    Object.entries(corsHeaders).forEach(([key, value]) => {
-      res.setHeader(key, value);
-    });
+    // Explicitly set CORS headers BEFORE anything else
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, HEAD');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Max-Age', '86400');
 
+    // Handle preflight requests
     if (req.method === 'OPTIONS') {
-      res.writeHead(204, corsHeaders);
+      res.writeHead(204);
       res.end();
       return;
     }
