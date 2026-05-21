@@ -19,12 +19,19 @@ const UNSUBSCRIBE_FOOTER_TEXT =
  * Throws on failure (caller handles retry).
  */
 export async function sendEmail({ to, toName, subject, body, isHtml, fromEmail, fromName }) {
+  const verifiedSender = process.env.FROM_EMAIL;
+  const isVerifiedSender = fromEmail === verifiedSender;
+
   const msg = {
     to: toName ? { email: to, name: toName } : to,
     from: {
-      email: fromEmail || process.env.FROM_EMAIL,
+      email: verifiedSender,
       name: fromName || process.env.FROM_NAME,
     },
+    // If a different sender was selected, route replies to them
+    ...((!isVerifiedSender && fromEmail) && {
+      replyTo: { email: fromEmail, name: fromName },
+    }),
     subject,
   };
 
