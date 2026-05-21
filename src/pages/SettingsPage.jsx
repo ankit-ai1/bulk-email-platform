@@ -4,7 +4,12 @@ import { useAuth } from '../hooks/useAuth'
 import toast from 'react-hot-toast'
 import { Settings, Mail, User, Shield, Save, CheckCircle, Eye, EyeOff, Lock, RefreshCw, Plus, Trash2, Clock, AtSign } from 'lucide-react'
 
-const WORKER_URL = import.meta.env.VITE_WORKER_URL || 'http://localhost:3001'
+const WORKER_URL = import.meta.env.VITE_WORKER_URL || 'https://bulk-email-platform-production.up.railway.app'
+
+// Debug: log the URL being used
+if (typeof window !== 'undefined') {
+  console.log('SettingsPage - WORKER_URL:', WORKER_URL)
+}
 
 export default function SettingsPage() {
   const { user } = useAuth()
