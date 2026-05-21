@@ -1,33 +1,37 @@
 import { useEffect, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import toast from 'react-hot-toast'
 import { Mail, CheckCircle, AlertCircle, Loader } from 'lucide-react'
 
 export default function ConfirmEmailPage() {
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
+  const location = useLocation()
   const [status, setStatus] = useState('loading') // 'loading' | 'success' | 'error'
   const [message, setMessage] = useState('Verifying your email...')
 
   useEffect(() => {
     const verifyEmail = async () => {
       try {
-        // Get the token from URL
-        const token = searchParams.get('token')
-        const type = searchParams.get('type')
+        // Get hash fragment from URL
+        const hash = location.hash.slice(1) // Remove the #
+        const params = new URLSearchParams(hash)
+        
+        const accessToken = params.get('access_token')
+        const type = params.get('type')
 
-        if (!token || type !== 'email') {
+        // type should be 'email_confirmation' or 'recovery' for email verification
+        if (!accessToken) {
           setStatus('error')
-          setMessage('Invalid verification link')
+          setMessage('Invalid verification link - missing token')
           toast.error('Invalid verification link')
           return
         }
 
-        // Verify the email using the token
-        const { error } = await supabase.auth.verifyOtp({
-          token_hash: token,
-          type: 'email'
+        // Set the session with the access token from the email link
+        const { data, error } = await supabase.auth.setSession({
+          access_token: accessToken,
+          refresh_token: params.get('refresh_token') || '',
         })
 
         if (error) {
@@ -37,14 +41,41 @@ export default function ConfirmEmailPage() {
           return
         }
 
-        setStatus('success')
-        setMessage('Email verified successfully!')
-        toast.success('Email verified! Redirecting to login...')
-
-        // Redirect to login after 2 seconds
-        setTimeout(() => {
-          navigate('/login')
-        }, 2000)
+        // Check if email is confirmed
+        if (data.user && data.user.email_confirmed_at) {
+          setStatus('success')
+          setMessage('Email verified successfully!')
+          toast.success('Email verified! Redirecting to login...')
+          
+          // Sign out so they have to login
+          await supabase.auth.signOut()
+          
+          setTimeout(() => {
+            navigate('/login')
+          }, 2000)
+        } else {
+          // Try alternative: use verifyOtp directly
+          const tokenHash = params.get('token_hash')
+          if (tokenHash) {
+            const { error: otpError } = await supabase.auth.verifyOtp({
+              token_hash: tokenHash,
+              type: 'email'
+            })
+            
+            if (!otpError) {
+              await supabase.auth.signOut()
+              setStatus('success')
+              setMessage('Email verified successfully!')
+              toast.success('Email verified!')
+              setTimeout(() => navigate('/login'), 2000)
+              return
+            }
+          }
+          
+          setStatus('error')
+          setMessage('Email verification failed - please check your link')
+          toast.error('Verification failed')
+        }
       } catch (err) {
         setStatus('error')
         setMessage(err.message || 'Something went wrong')
@@ -53,7 +84,7 @@ export default function ConfirmEmailPage() {
     }
 
     verifyEmail()
-  }, [searchParams, navigate])
+  }, [location, navigate])
 
   return (
     <div style={{

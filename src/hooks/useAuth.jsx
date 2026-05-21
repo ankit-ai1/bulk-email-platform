@@ -9,35 +9,51 @@ export function AuthProvider({ children }) {
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
+      // Check if session user has confirmed email
+      if (session?.user && !session.user.email_confirmed_at) {
+        supabase.auth.signOut()
+        setUser(null)
+      } else {
+        setUser(session?.user ?? null)
+      }
       setLoading(false)
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
+      // Check if session user has confirmed email
+      if (session?.user && !session.user.email_confirmed_at) {
+        supabase.auth.signOut()
+        setUser(null)
+      } else {
+        setUser(session?.user ?? null)
+      }
     })
 
     return () => subscription.unsubscribe()
   }, [])
 
   const signIn = async (email, password) => {
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-    
-    if (error) return { data, error }
-    
-    // Check if email is confirmed
-    if (data.user && !data.user.email_confirmed_at) {
-      await supabase.auth.signOut()
-      return {
-        data: null,
-        error: {
-          message: 'Please verify your email before signing in. Check your inbox for the verification link.',
-          code: 'email_not_confirmed'
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+      
+      if (error) return { data, error }
+      
+      // Check if email is confirmed - if not, sign them out immediately
+      if (data.user && !data.user.email_confirmed_at) {
+        await supabase.auth.signOut()
+        return {
+          data: null,
+          error: {
+            message: 'Please verify your email before signing in. Check your inbox for the verification link.',
+            code: 'email_not_confirmed'
+          }
         }
       }
+      
+      return { data, error }
+    } catch (err) {
+      return { data: null, error: err }
     }
-    
-    return { data, error }
   }
 
   const signUp = async (email, password, fullName) => {
