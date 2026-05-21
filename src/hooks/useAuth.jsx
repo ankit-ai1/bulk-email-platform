@@ -22,6 +22,21 @@ export function AuthProvider({ children }) {
 
   const signIn = async (email, password) => {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    
+    if (error) return { data, error }
+    
+    // Check if email is confirmed
+    if (data.user && !data.user.email_confirmed_at) {
+      await supabase.auth.signOut()
+      return {
+        data: null,
+        error: {
+          message: 'Please verify your email before signing in. Check your inbox for the verification link.',
+          code: 'email_not_confirmed'
+        }
+      }
+    }
+    
     return { data, error }
   }
 
@@ -29,7 +44,10 @@ export function AuthProvider({ children }) {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: { data: { full_name: fullName } }
+      options: {
+        data: { full_name: fullName },
+        emailRedirectTo: `${window.location.origin}/confirm-email`,
+      }
     })
     return { data, error }
   }

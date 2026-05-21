@@ -18,6 +18,7 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false)
   const [form, setForm] = useState({ email: '', password: '', fullName: '' })
   const [forgotSent, setForgotSent] = useState(false)
+  const [signupEmail, setSignupEmail] = useState(null)
 
   // Pre-fill remembered email on mount
   useEffect(() => {
@@ -48,7 +49,8 @@ export default function LoginPage() {
         const { error } = await signUp(form.email, form.password, form.fullName)
         if (error) throw error
         toast.success('Account created! Check your email to verify.')
-        setMode('login')
+        setSignupEmail(form.email)
+        setForm({ email: '', password: '', fullName: '' })
       }
     } catch (err) {
       toast.error(err.message || 'Something went wrong')
@@ -78,6 +80,7 @@ export default function LoginPage() {
   function switchMode(m) {
     setMode(m)
     setForgotSent(false)
+    setSignupEmail(null)
   }
 
   return (
@@ -122,8 +125,48 @@ export default function LoginPage() {
 
         <div className="card" style={{ padding: '32px' }}>
 
+          {/* ── EMAIL VERIFICATION NOTICE ── */}
+          {signupEmail && (
+            <div style={{
+              background: 'rgba(67,233,123,0.1)',
+              border: '1px solid rgba(67,233,123,0.3)',
+              borderRadius: '10px',
+              padding: '16px',
+              marginBottom: '24px',
+              display: 'flex',
+              gap: '12px',
+              alignItems: 'flex-start',
+            }}>
+              <Mail size={20} color="#43e97b" style={{ flexShrink: 0, marginTop: '2px' }} />
+              <div style={{ flex: 1 }}>
+                <h4 style={{ fontWeight: 600, color: 'var(--text-primary)', fontSize: '14px', margin: '0 0 4px 0' }}>
+                  Verify your email
+                </h4>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '13px', margin: 0 }}>
+                  We sent a verification link to <strong>{signupEmail}</strong>. Click the link to verify your account.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setSignupEmail(null)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: 'var(--accent)',
+                    fontSize: '12px',
+                    cursor: 'pointer',
+                    padding: '6px 0',
+                    marginTop: '8px',
+                    fontWeight: '600',
+                  }}
+                >
+                  Already verified? Sign in
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* ── LOGIN / SIGNUP TOGGLE ── */}
-          {mode !== 'forgot' && (
+          {mode !== 'forgot' && !signupEmail && (
             <div style={{
               display: 'flex', background: 'var(--bg-elevated)',
               borderRadius: '10px', padding: '4px', marginBottom: '28px',
@@ -204,7 +247,7 @@ export default function LoginPage() {
           )}
 
           {/* ── LOGIN / SIGNUP FORM ── */}
-          {mode !== 'forgot' && (
+          {mode !== 'forgot' && !signupEmail && (
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               {mode === 'signup' && (
                 <div className="input-group">
