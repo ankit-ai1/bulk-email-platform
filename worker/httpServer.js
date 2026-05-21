@@ -21,6 +21,13 @@ function sendWithCORS(res, statusCode, body) {
 export function startHttpServer() {
   const server = http.createServer(async (req, res) => {
     try {
+      const method = req.method;
+      const url = req.url;
+      const origin = req.headers.origin;
+
+      // Log incoming request
+      console.log(`[HTTP] ${method} ${url} from origin: ${origin}`);
+
       // Always add CORS headers first, regardless of anything
       const corsHeaders = {
         'Access-Control-Allow-Origin': '*',
@@ -34,10 +41,14 @@ export function startHttpServer() {
         res.setHeader(key, value);
       });
 
+      console.log(`[CORS] Headers set for ${method} ${url}`);
+
       // Handle preflight requests - MUST be before body parsing
       if (req.method === 'OPTIONS') {
+        console.log(`[OPTIONS] Responding to preflight request from ${origin}`);
         res.writeHead(204, corsHeaders);
         res.end();
+        console.log(`[OPTIONS] Preflight response sent with headers:`, corsHeaders);
         return;
       }
 
