@@ -32,6 +32,14 @@ function validateEnv() {
   }
 }
 
+process.on('uncaughtException', (err) => {
+  console.error('[Worker] Uncaught exception:', err.message, err.stack);
+});
+
+process.on('unhandledRejection', (reason) => {
+  console.error('[Worker] Unhandled rejection:', reason);
+});
+
 validateEnv();
 startHttpServer();
 
