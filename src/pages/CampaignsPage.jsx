@@ -16,6 +16,7 @@ export default function CampaignsPage() {
   const [campaigns, setCampaigns] = useState([])
   const [templates, setTemplates] = useState([])
   const [contactLists, setContactLists] = useState([])
+  const [senderEmails, setSenderEmails] = useState([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [showLaunchModal, setShowLaunchModal] = useState(null)
@@ -29,14 +30,16 @@ export default function CampaignsPage() {
 
   async function loadAll() {
     setLoading(true)
-    const [c, t, l] = await Promise.all([
+    const [c, t, l, s] = await Promise.all([
       supabase.from('campaigns').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
       supabase.from('templates').select('id, name').eq('user_id', user.id),
       supabase.from('contact_lists').select('id, name, total_contacts').eq('user_id', user.id),
+      supabase.from('sender_emails').select('id, name, email').eq('user_id', user.id).eq('is_verified', true),
     ])
     setCampaigns(c.data || [])
     setTemplates(t.data || [])
     setContactLists(l.data || [])
+    setSenderEmails(s.data || [])
     setLoading(false)
   }
 
@@ -65,6 +68,7 @@ export default function CampaignsPage() {
 
   async function handleCreate(e) {
     e.preventDefault()
+    if (!form.from_email) { toast.error('Select a sender email'); return }
     if (form.list_ids.length === 0) { toast.error('Select at least one contact list'); return }
     setSaving(true)
     const { list_ids, ...rest } = form
@@ -222,17 +226,34 @@ export default function CampaignsPage() {
                 <input className="input" placeholder="e.g. Exclusive offer just for you" value={form.subject}
                   onChange={e => setForm({ ...form, subject: e.target.value })} required />
               </div>
-              <div className="grid-2">
-                <div className="input-group">
-                  <label className="input-label">Sender Name *</label>
-                  <input className="input" placeholder="Your Company" value={form.from_name}
-                    onChange={e => setForm({ ...form, from_name: e.target.value })} required />
-                </div>
-                <div className="input-group">
-                  <label className="input-label">Sender Email *</label>
-                  <input className="input" type="email" placeholder="hello@yourcompany.com" value={form.from_email}
-                    onChange={e => setForm({ ...form, from_email: e.target.value })} required />
-                </div>
+              <div className="input-group">
+                <label className="input-label">Sender Gmail *</label>
+                {senderEmails.length > 0 ? (
+                  <select
+                    className="input"
+                    value={form.from_email}
+                    onChange={e => {
+                      const selected = senderEmails.find(s => s.email === e.target.value)
+                      setForm({ ...form, from_email: e.target.value, from_name: selected?.name || form.from_name })
+                    }}
+                    required
+                  >
+                    <option value="">Select a sender email</option>
+                    {senderEmails.map(s => (
+                      <option key={s.id} value={s.email}>{s.name} &lt;{s.email}&gt;</option>
+                    ))}
+                  </select>
+                ) : (
+                  <div style={{
+                    padding: '12px 14px', borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--border)', fontSize: '13px', color: 'var(--text-muted)',
+                    background: 'var(--bg-elevated)',
+                  }}>
+                    No verified sender emails — go to{' '}
+                    <strong style={{ color: 'var(--accent)' }}>Settings → Sender Emails</strong>{' '}
+                    to add one.
+                  </div>
+                )}
               </div>
               <div className="input-group">
                 <label className="input-label">Email Template</label>

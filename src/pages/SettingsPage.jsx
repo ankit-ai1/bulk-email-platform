@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
 import toast from 'react-hot-toast'
-import { Settings, Mail, User, Shield, Save, CheckCircle, Eye, EyeOff, Lock, RefreshCw } from 'lucide-react'
+import { Settings, Mail, User, Shield, Save, CheckCircle, Eye, EyeOff, Lock, RefreshCw, Plus, Trash2, Clock, AtSign } from 'lucide-react'
 
 const WORKER_URL = import.meta.env.VITE_WORKER_URL || 'http://localhost:3001'
 
@@ -33,14 +33,116 @@ export default function SettingsPage() {
   // Show/hide API key
   const [showApiKey, setShowApiKey] = useState(false)
 
-  useEffect(() => { if (user) loadSettings() }, [user])
+  // Sender emails
+  const [senderEmails, setSenderEmails] = useState([])
+  const [senderForm, setSenderForm] = useState({ name: '', email: '' })
+  const [addingSender, setAddingSender] = useState(false)
+  const [otpVisible, setOtpVisible] = useState({}) // { [id]: true/false }
+  const [otpValues, setOtpValues] = useState({})   // { [id]: '123456' }
+  const [verifyingOtp, setVerifyingOtp] = useState(null) // id being verified
+  const [deletingSender, setDeletingSender] = useState(null)
+
+  useEffect(() => { if (user) { loadSettings(); loadSenderEmails() } }, [user])
+
+  async function loadSenderEmails() {
+    const { data } = await supabase
+      .from('sender_emails')
+      .select('*')
+      .eq('user_id', user.id)
+      .order('created_at', { ascending: true })
+    setSenderEmails(data || [])
+  }
+
+  async function handleAddSenderEmail(e) {
+    e.preventDefault()
+    if (!senderForm.name.trim() || !senderForm.email.trim()) return
+    if (senderEmails.length >= 20) { toast.error('Maximum 20 sender emails allowed'); return }
+    const emailAdded = senderForm.email.trim()
+    setAddingSender(true)
+    try {
+      const res = await fetch(`${WORKER_URL}/send-verification-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: emailAdded, name: senderForm.name.trim(), userId: user.id }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed to send OTP')
+      toast.success(`Verification code sent to ${emailAdded}`)
+      setSenderForm({ name: '', email: '' })
+      // Reload and auto-show OTP input for the new email
+      const { data: updated } = await supabase
+        .from('sender_emails')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: true })
+      setSenderEmails(updated || [])
+      const fresh = (updated || []).find(s => s.email === emailAdded)
+      if (fresh) setOtpVisible(v => ({ ...v, [fresh.id]: true }))
+    } catch (err) {
+      toast.error(err.message)
+    } finally {
+      setAddingSender(false)
+    }
+  }
+
+  async function handleResendOtp(se) {
+    setAddingSender(true)
+    try {
+      const res = await fetch(`${WORKER_URL}/send-verification-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: se.email, name: se.name, userId: user.id }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Failed')
+      toast.success(`New code sent to ${se.email}`)
+      setOtpValues(v => ({ ...v, [se.id]: '' }))
+      setOtpVisible(v => ({ ...v, [se.id]: true }))
+    } catch (err) {
+      toast.error(err.message)
+    } finally {
+      setAddingSender(false)
+    }
+  }
+
+  async function handleVerifyOtp(se) {
+    const otp = (otpValues[se.id] || '').trim()
+    if (otp.length !== 6) { toast.error('Enter the 6-digit code'); return }
+    setVerifyingOtp(se.id)
+    try {
+      const res = await fetch(`${WORKER_URL}/verify-sender-otp`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: se.email, userId: user.id, otp }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Verification failed')
+      toast.success(`${se.email} verified!`)
+      setOtpVisible(v => ({ ...v, [se.id]: false }))
+      setOtpValues(v => ({ ...v, [se.id]: '' }))
+      loadSenderEmails()
+    } catch (err) {
+      toast.error(err.message)
+    } finally {
+      setVerifyingOtp(null)
+    }
+  }
+
+  async function handleDeleteSender(id) {
+    if (!confirm('Remove this sender email?')) return
+    setDeletingSender(id)
+    const { error } = await supabase.from('sender_emails').delete().eq('id', id)
+    if (error) toast.error(error.message)
+    else { toast.success('Removed'); loadSenderEmails() }
+    setDeletingSender(null)
+  }
 
   async function loadSettings() {
     const { data, error } = await supabase
       .from('user_settings')
       .select('*')
       .eq('user_id', user.id)
-      .single()
+      .maybeSingle()
 
     if (data) {
       setSettings(prev => ({ ...prev, ...data }))
@@ -136,6 +238,7 @@ export default function SettingsPage() {
   const tabs = [
     { id: 'profile', label: 'Profile', icon: User },
     { id: 'email', label: 'Email Provider', icon: Mail },
+    { id: 'senders', label: 'Sender Emails', icon: AtSign },
     { id: 'sending', label: 'Sending Config', icon: Settings },
     { id: 'security', label: 'Security', icon: Shield },
   ]
@@ -334,6 +437,113 @@ export default function SettingsPage() {
                 </button>
               </div>
             </form>
+          )}
+
+          {/* ── SENDER EMAILS ── */}
+          {tab === 'senders' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div className="card">
+                <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '17px', marginBottom: '6px' }}>Sender Email Accounts</h3>
+                <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '20px' }}>
+                  Add up to 20 verified sender emails. Each email receives a verification code before it can be used in campaigns.
+                  <span style={{ display: 'block', marginTop: '4px', fontSize: '12px', color: 'var(--text-muted)' }}>
+                    {senderEmails.length}/20 accounts added &nbsp;·&nbsp; {senderEmails.filter(s => s.is_verified).length} verified
+                  </span>
+                </p>
+
+                {senderEmails.length < 20 && (
+                  <form onSubmit={handleAddSenderEmail} style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', marginBottom: '20px' }}>
+                    <input
+                      className="input"
+                      placeholder="Sender Name"
+                      value={senderForm.name}
+                      onChange={e => setSenderForm(f => ({ ...f, name: e.target.value }))}
+                      style={{ flex: '1 1 160px' }}
+                      required
+                    />
+                    <input
+                      className="input"
+                      type="email"
+                      placeholder="email@domain.com"
+                      value={senderForm.email}
+                      onChange={e => setSenderForm(f => ({ ...f, email: e.target.value }))}
+                      style={{ flex: '2 1 220px' }}
+                      required
+                    />
+                    <button type="submit" className="btn btn-primary" disabled={addingSender} style={{ flexShrink: 0 }}>
+                      {addingSender ? <div className="spinner" /> : <><Plus size={14} /> Add & Verify</>}
+                    </button>
+                  </form>
+                )}
+
+                {senderEmails.length === 0 && (
+                  <div style={{ textAlign: 'center', padding: '24px', color: 'var(--text-muted)', fontSize: '13px' }}>
+                    No sender emails added yet. Add one above to get started.
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  {senderEmails.map(se => (
+                    <div key={se.id} style={{
+                      padding: '14px 16px', borderRadius: 'var(--radius-sm)',
+                      border: `1px solid ${se.is_verified ? 'rgba(67,233,123,0.3)' : 'var(--border)'}`,
+                      background: se.is_verified ? 'rgba(67,233,123,0.04)' : 'var(--bg-elevated)',
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontSize: '14px', fontWeight: 600, color: 'var(--text-primary)' }}>{se.name}</div>
+                          <div style={{ fontSize: '12px', color: 'var(--text-muted)', marginTop: '2px' }}>{se.email}</div>
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          {se.is_verified ? (
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', color: '#43e97b', fontWeight: 600 }}>
+                              <CheckCircle size={13} /> Verified
+                            </span>
+                          ) : (
+                            <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '12px', color: 'var(--text-muted)' }}>
+                              <Clock size={13} /> Pending
+                            </span>
+                          )}
+                          {!se.is_verified && (
+                            <button className="btn btn-secondary btn-sm" style={{ fontSize: '11px', padding: '4px 10px' }}
+                              onClick={() => setOtpVisible(v => ({ ...v, [se.id]: !v[se.id] }))}>
+                              {otpVisible[se.id] ? 'Hide' : 'Enter Code'}
+                            </button>
+                          )}
+                          <button className="btn btn-danger btn-sm" style={{ padding: '5px 8px' }}
+                            disabled={deletingSender === se.id}
+                            onClick={() => handleDeleteSender(se.id)}>
+                            <Trash2 size={12} />
+                          </button>
+                        </div>
+                      </div>
+
+                      {!se.is_verified && otpVisible[se.id] && (
+                        <div style={{ marginTop: '12px', display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                          <input
+                            className="input"
+                            placeholder="6-digit code"
+                            maxLength={6}
+                            value={otpValues[se.id] || ''}
+                            onChange={e => setOtpValues(v => ({ ...v, [se.id]: e.target.value.replace(/\D/g, '') }))}
+                            style={{ width: '140px', letterSpacing: '4px', fontWeight: 700, fontSize: '16px', textAlign: 'center' }}
+                          />
+                          <button className="btn btn-primary btn-sm"
+                            disabled={verifyingOtp === se.id || (otpValues[se.id] || '').length !== 6}
+                            onClick={() => handleVerifyOtp(se)}>
+                            {verifyingOtp === se.id ? <div className="spinner" /> : 'Verify'}
+                          </button>
+                          <button className="btn btn-secondary btn-sm" disabled={addingSender}
+                            onClick={() => handleResendOtp(se)}>
+                            Resend Code
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           )}
 
           {/* ── SENDING CONFIG ── */}
