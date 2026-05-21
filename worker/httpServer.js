@@ -4,18 +4,30 @@ import { supabase } from './logger.js';
 
 const PORT = parseInt(process.env.PORT || process.env.WORKER_PORT) || 3001;
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Max-Age': '86400',
+};
+
+function sendResponse(res, statusCode, data) {
+  res.writeHead(statusCode, {
+    ...corsHeaders,
+    'Content-Type': 'application/json',
+  });
+  res.end(JSON.stringify(data));
+}
+
 export function startHttpServer() {
   const server = http.createServer(async (req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    // Set CORS headers for all responses
+    Object.entries(corsHeaders).forEach(([key, value]) => {
+      res.setHeader(key, value);
+    });
 
     if (req.method === 'OPTIONS') {
-      res.writeHead(204, {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type',
-      });
+      res.writeHead(204, corsHeaders);
       res.end();
       return;
     }
@@ -27,8 +39,7 @@ export function startHttpServer() {
         try {
           const { email, name, userId } = JSON.parse(body);
           if (!email || !userId) {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Missing email or userId' }));
+            sendResponse(res, 400, { error: 'Missing email or userId' });
             return;
           }
 
@@ -40,8 +51,7 @@ export function startHttpServer() {
             .maybeSingle();
 
           if (existing?.is_verified) {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'This email is already verified' }));
+            sendResponse(res, 400, { error: 'This email is already verified' });
             return;
           }
 
@@ -51,8 +61,7 @@ export function startHttpServer() {
               .select('*', { count: 'exact', head: true })
               .eq('user_id', userId);
             if (count >= 20) {
-              res.writeHead(400, { 'Content-Type': 'application/json' });
-              res.end(JSON.stringify({ error: 'Maximum 20 sender emails allowed' }));
+              sendResponse(res, 400, { error: 'Maximum 20 sender emails allowed' });
               return;
             }
           }
@@ -89,12 +98,10 @@ export function startHttpServer() {
             fromName: process.env.FROM_NAME || 'MailForge',
           });
 
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ success: true }));
+          sendResponse(res, 200, { success: true });
         } catch (err) {
           const detail = err.response?.body?.errors?.[0]?.message || err.message;
-          res.writeHead(500, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: detail }));
+          sendResponse(res, 500, { error: detail });
         }
       });
       return;
@@ -107,8 +114,7 @@ export function startHttpServer() {
         try {
           const { email, userId, otp } = JSON.parse(body);
           if (!email || !userId || !otp) {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Missing required fields' }));
+            sendResponse(res, 400, { error: 'Missing required fields' });
             return;
           }
 
@@ -120,23 +126,19 @@ export function startHttpServer() {
             .maybeSingle();
 
           if (!record) {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Email not found' }));
+            sendResponse(res, 400, { error: 'Email not found' });
             return;
           }
           if (record.is_verified) {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Email already verified' }));
+            sendResponse(res, 400, { error: 'Email already verified' });
             return;
           }
           if (record.otp_code !== otp) {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Invalid verification code' }));
+            sendResponse(res, 400, { error: 'Invalid verification code' });
             return;
           }
           if (new Date(record.otp_expires_at) < new Date()) {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Code expired — please resend' }));
+            sendResponse(res, 400, { error: 'Code expired — please resend' });
             return;
           }
 
@@ -148,11 +150,9 @@ export function startHttpServer() {
 
           if (updateError) throw new Error(updateError.message);
 
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ success: true }));
+          sendResponse(res, 200, { success: true });
         } catch (err) {
-          res.writeHead(500, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: err.message }));
+          sendResponse(res, 500, { error: err.message });
         }
       });
       return;
@@ -165,8 +165,7 @@ export function startHttpServer() {
         try {
           const { to, fromEmail, fromName } = JSON.parse(body);
           if (!to) {
-            res.writeHead(400, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ error: 'Missing recipient email' }));
+            sendResponse(res, 400, { error: 'Missing recipient email' });
             return;
           }
           await sendEmail({
@@ -182,25 +181,21 @@ export function startHttpServer() {
             fromEmail: fromEmail || process.env.FROM_EMAIL,
             fromName: fromName || process.env.FROM_NAME,
           });
-          res.writeHead(200, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ success: true }));
+          sendResponse(res, 200, { success: true });
         } catch (err) {
           const detail = err.response?.body?.errors?.[0]?.message || err.message;
-          res.writeHead(500, { 'Content-Type': 'application/json' });
-          res.end(JSON.stringify({ error: detail }));
+          sendResponse(res, 500, { error: detail });
         }
       });
       return;
     }
 
     if (req.method === 'GET' && req.url === '/health') {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      res.end(JSON.stringify({ status: 'ok' }));
+      sendResponse(res, 200, { status: 'ok' });
       return;
     }
 
-    res.writeHead(404);
-    res.end();
+    sendResponse(res, 404, { error: 'Not found' });
   });
 
   server.listen(PORT, '0.0.0.0', () => {
