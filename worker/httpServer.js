@@ -2,7 +2,7 @@ import http from 'http';
 import { sendEmail } from './emailSender.js';
 import { supabase } from './logger.js';
 
-const PORT = parseInt(process.env.WORKER_PORT) || 3001;
+const PORT = parseInt(process.env.PORT || process.env.WORKER_PORT) || 3001;
 
 export function startHttpServer() {
   const server = http.createServer(async (req, res) => {
@@ -203,7 +203,7 @@ export function startHttpServer() {
     res.end();
   });
 
-  server.listen(PORT, '127.0.0.1', () => {
-    console.log(`[HTTP] Worker API listening on http://127.0.0.1:${PORT}`);
+  server.listen(PORT, '0.0.0.0', () => {
+    console.log(`[HTTP] Worker API listening on port ${PORT}`);
   });
 }
