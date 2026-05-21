@@ -4,6 +4,7 @@ import { supabase } from './logger.js';
 
 const PORT = parseInt(process.env.PORT || process.env.WORKER_PORT) || 3001;
 
+// CORS headers configuration - Ensure proper preflight handling
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'POST, GET, OPTIONS',
