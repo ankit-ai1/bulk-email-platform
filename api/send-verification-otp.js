@@ -1,18 +1,18 @@
 import { createClient } from '@supabase/supabase-js';
 import sgMail from '@sendgrid/mail';
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
-const supabase = createClient(
-  process.env.VITE_SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY,
-  { auth: { persistSession: false } }
-);
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { email, name, userId } = req.body;
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+  const supabase = createClient(
+    process.env.VITE_SUPABASE_URL,
+    process.env.SUPABASE_SERVICE_KEY,
+    { auth: { persistSession: false } }
+  );
+
+  const { email, name, userId } = req.body || {};
   if (!email || !userId) return res.status(400).json({ error: 'Missing email or userId' });
 
   try {

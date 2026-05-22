@@ -1,11 +1,11 @@
 import sgMail from '@sendgrid/mail';
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const { to } = req.body;
+  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+  const { to } = req.body || {};
   if (!to) return res.status(400).json({ error: 'Missing recipient email' });
 
   try {
