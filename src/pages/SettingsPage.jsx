@@ -4,7 +4,7 @@ import { useAuth } from '../hooks/useAuth'
 import toast from 'react-hot-toast'
 import { Settings, Mail, User, Shield, Save, CheckCircle, Eye, EyeOff, Lock, RefreshCw, Plus, Trash2, Clock, AtSign } from 'lucide-react'
 
-const WORKER_URL = import.meta.env.VITE_WORKER_URL || 'https://bulk-email-platform-production.up.railway.app'
+const WORKER_URL = '/api'
 
 // Debug: log the URL being used
 if (typeof window !== 'undefined') {
