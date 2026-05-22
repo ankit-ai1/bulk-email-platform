@@ -1,18 +1,18 @@
-const { createClient } = require('@supabase/supabase-js');
+import { createClient } from '@supabase/supabase-js';
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const supabase = createClient(
-    process.env.VITE_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_KEY,
-    { auth: { persistSession: false } }
-  );
-
-  const { email, userId, otp } = req.body || {};
-  if (!email || !userId || !otp) return res.status(400).json({ error: 'Missing required fields' });
-
   try {
+    const supabase = createClient(
+      process.env.VITE_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_KEY,
+      { auth: { persistSession: false } }
+    );
+
+    const { email, userId, otp } = req.body || {};
+    if (!email || !userId || !otp) return res.status(400).json({ error: 'Missing required fields' });
+
     const { data: record } = await supabase
       .from('sender_emails')
       .select('*')
@@ -37,4 +37,4 @@ module.exports = async function handler(req, res) {
   } catch (err) {
     return res.status(500).json({ error: err.message });
   }
-};
+}

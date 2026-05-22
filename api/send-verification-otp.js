@@ -1,21 +1,21 @@
-const { createClient } = require('@supabase/supabase-js');
-const sgMail = require('@sendgrid/mail');
+import { createClient } from '@supabase/supabase-js';
+import sgMail from '@sendgrid/mail';
 
-module.exports = async function handler(req, res) {
+export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
-  const supabase = createClient(
-    process.env.VITE_SUPABASE_URL,
-    process.env.SUPABASE_SERVICE_KEY,
-    { auth: { persistSession: false } }
-  );
-
-  const { email, name, userId } = req.body || {};
-  if (!email || !userId) return res.status(400).json({ error: 'Missing email or userId' });
-
   try {
+    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+
+    const supabase = createClient(
+      process.env.VITE_SUPABASE_URL,
+      process.env.SUPABASE_SERVICE_KEY,
+      { auth: { persistSession: false } }
+    );
+
+    const { email, name, userId } = req.body || {};
+    if (!email || !userId) return res.status(400).json({ error: 'Missing email or userId' });
+
     const { data: existing } = await supabase
       .from('sender_emails')
       .select('is_verified')
@@ -68,4 +68,4 @@ module.exports = async function handler(req, res) {
     const detail = err.response?.body?.errors?.[0]?.message || err.message;
     return res.status(500).json({ error: detail });
   }
-};
+}
