@@ -51,11 +51,11 @@ export default async function handler(req, res) {
 
     await sgMail.send({
       to: email,
-      from: { email: process.env.FROM_EMAIL, name: process.env.FROM_NAME || 'MailForge' },
-      subject: 'Verify your sender email — MailForge',
+      from: { email: process.env.FROM_EMAIL, name: process.env.FROM_NAME || 'MailRax' },
+      subject: 'Verify your sender email — MailRax',
       html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px;">
         <h2 style="color:#6c63ff;margin-bottom:16px;">Verify Your Email</h2>
-        <p style="color:#333;">Use the code below to verify <strong>${email}</strong> as a sender in MailForge.</p>
+        <p style="color:#333;">Use the code below to verify <strong>${email}</strong> as a sender in MailRax.</p>
         <div style="background:#f4f3ff;border:2px solid #6c63ff;border-radius:12px;padding:24px;text-align:center;margin:24px 0;">
           <span style="font-size:36px;font-weight:800;letter-spacing:12px;color:#6c63ff;">${otp}</span>
         </div>

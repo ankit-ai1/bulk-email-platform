@@ -6,15 +6,15 @@ const PORT = parseInt(process.env.PORT || process.env.WORKER_PORT) || 3001;
 
 // Helper to send response with guaranteed CORS headers
 function sendWithCORS(res, statusCode, body) {
-  const corsHeaders = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, HEAD',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Max-Age': '86400',
-    'Content-Type': 'application/json',
-  };
+  // Set headers explicitly BEFORE writeHead
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, HEAD');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.setHeader('Access-Control-Max-Age', '86400');
+  res.setHeader('Content-Type', 'application/json');
 
-  res.writeHead(statusCode, corsHeaders);
+  // Now write the head
+  res.writeHead(statusCode);
   res.end(JSON.stringify(body));
 }
 
@@ -29,26 +29,23 @@ export function startHttpServer() {
       console.log(`[HTTP] ${method} ${url} from origin: ${origin}`);
 
       // Always add CORS headers first, regardless of anything
-      const corsHeaders = {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, GET, OPTIONS, HEAD',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-        'Access-Control-Max-Age': '86400',
-      };
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, HEAD');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+      res.setHeader('Access-Control-Max-Age', '86400');
 
-      // Add CORS headers to response
-      Object.entries(corsHeaders).forEach(([key, value]) => {
-        res.setHeader(key, value);
-      });
-
-      console.log(`[CORS] Headers set for ${method} ${url}`);
+      console.log(`[CORS] Headers queued for ${method} ${url}`);
 
       // Handle preflight requests - MUST be before body parsing
       if (req.method === 'OPTIONS') {
         console.log(`[OPTIONS] Responding to preflight request from ${origin}`);
-        res.writeHead(204, corsHeaders);
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'POST, GET, OPTIONS, HEAD');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+        res.setHeader('Access-Control-Max-Age', '86400');
+        res.writeHead(204);
         res.end();
-        console.log(`[OPTIONS] Preflight response sent with headers:`, corsHeaders);
+        console.log(`[OPTIONS] Preflight response sent`);
         return;
       }
 
@@ -109,10 +106,10 @@ export function startHttpServer() {
 
             await sendEmail({
               to: email,
-              subject: 'Verify your sender email — MailForge',
+              subject: 'Verify your sender email — MailRax',
               body: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px;">
                 <h2 style="color:#6c63ff;margin-bottom:16px;">Verify Your Email</h2>
-                <p style="color:#333;">Use the code below to verify <strong>${email}</strong> as a sender in MailForge.</p>
+                <p style="color:#333;">Use the code below to verify <strong>${email}</strong> as a sender in MailRax.</p>
                 <div style="background:#f4f3ff;border:2px solid #6c63ff;border-radius:12px;padding:24px;text-align:center;margin:24px 0;">
                   <span style="font-size:36px;font-weight:800;letter-spacing:12px;color:#6c63ff;">${otp}</span>
                 </div>
@@ -120,7 +117,7 @@ export function startHttpServer() {
               </div>`,
               isHtml: true,
               fromEmail: process.env.FROM_EMAIL,
-              fromName: process.env.FROM_NAME || 'MailForge',
+              fromName: process.env.FROM_NAME || 'MailRax',
             });
 
             sendWithCORS(res, 200, { success: true });
@@ -213,12 +210,12 @@ export function startHttpServer() {
             }
             await sendEmail({
               to,
-              subject: 'Test Email — MailForge',
+              subject: 'Test Email — MailRax',
               body: `
                 <div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px;">
                   <h2 style="color:#6c63ff;">Test Email</h2>
                   <p>Your SendGrid configuration is working correctly!</p>
-                  <p style="color:#888;font-size:13px;">Sent from <strong>MailForge</strong> worker.</p>
+                  <p style="color:#888;font-size:13px;">Sent from <strong>MailRax</strong> worker.</p>
                 </div>`,
               isHtml: true,
               fromEmail: fromEmail || process.env.FROM_EMAIL,

@@ -5,7 +5,7 @@ import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { Zap, Mail, Lock, User, Eye, EyeOff, ArrowRight, ArrowLeft, KeyRound } from 'lucide-react'
 
-const REMEMBER_KEY = 'mailforge_remembered_email'
+const REMEMBER_KEY = 'mailrax_remembered_email'
 
 export default function LoginPage() {
   const { signIn, signUp } = useAuth()
@@ -114,7 +114,7 @@ export default function LoginPage() {
             <Zap size={28} color="white" />
           </div>
           <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '28px', color: 'var(--text-primary)', marginBottom: '6px' }}>
-            MailForge
+            MailRax
           </h1>
           <p style={{ color: 'var(--text-secondary)', fontSize: '14px' }}>
             {mode === 'login' && 'Sign in to your campaign platform'}

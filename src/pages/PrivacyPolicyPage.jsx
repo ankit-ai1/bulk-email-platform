@@ -18,7 +18,7 @@ export default function PrivacyPolicyPage() {
         <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}>Last updated: June 1, 2026</p>
         <h1 style={{ fontSize: '32px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '12px' }}>Privacy Policy</h1>
         <p style={{ fontSize: '15px', color: 'var(--text-secondary)' }}>
-          This Privacy Policy explains how MailForge collects, uses, and protects your personal information when you use our bulk email platform.
+          This Privacy Policy explains how MailRax collects, uses, and protects your personal information when you use our bulk email platform.
         </p>
       </div>
 
@@ -69,7 +69,7 @@ export default function PrivacyPolicyPage() {
       </Section>
 
       <Section title="8. Contact">
-        <p>For privacy-related questions or requests, contact us at: <a href="mailto:privacy@mailforge.app" style={{ color: 'var(--accent)' }}>privacy@mailforge.app</a></p>
+        <p>For privacy-related questions or requests, contact us at: <a href="mailto:privacy@mailrax.app" style={{ color: 'var(--accent)' }}>privacy@mailrax.app</a></p>
       </Section>
     </PublicLayout>
   )

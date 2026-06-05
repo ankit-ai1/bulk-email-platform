@@ -1,5 +1,13 @@
 import { Link, useLocation } from 'react-router-dom'
-import { Zap } from 'lucide-react'
+import { Zap, CheckCircle } from 'lucide-react'
+import SiteFooter from './SiteFooter'
+
+const navLinks = [
+  { label: 'Home', to: '/' },
+  { label: 'About', to: '/about' },
+  { label: 'Pricing', to: '/pricing' },
+  { label: 'Contact', to: '/contact' },
+]
 
 const footerLinks = [
   { label: 'Privacy Policy', to: '/privacy-policy' },
@@ -14,58 +22,60 @@ export default function PublicLayout({ children }) {
   const { pathname } = useLocation()
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--bg-primary)' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#fff', color: '#0f0f1a', fontFamily: 'var(--font-body)' }}>
+
       {/* Header */}
       <header style={{
-        borderBottom: '1px solid var(--border)',
-        background: 'var(--bg-secondary)',
+        borderBottom: '1px solid rgba(0,0,0,0.07)',
+        background: 'rgba(255,255,255,0.95)',
+        backdropFilter: 'blur(16px)',
         position: 'sticky', top: 0, zIndex: 50,
       }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto', padding: '0 24px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <Link to="/login" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
+        <div style={{ maxWidth: '1000px', margin: '0 auto', padding: '0 24px', height: '64px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
             <div style={{
               width: '32px', height: '32px', borderRadius: '8px',
-              background: 'linear-gradient(135deg, #6c63ff, #a78bfa)',
+              background: 'linear-gradient(135deg, #00c896, #6c63ff)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 4px 12px rgba(108,99,255,0.25)',
             }}>
-              <Zap size={16} color="white" fill="white" />
+              <Zap size={15} color="#fff" fill="#fff" />
             </div>
-            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '18px', color: 'var(--text-primary)' }}>
-              MailForge
+            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '17px', color: '#0f0f1a' }}>
+              MailRax
             </span>
           </Link>
-          <Link to="/login" style={{
-            fontSize: '13px', color: 'var(--accent)', textDecoration: 'none', fontWeight: 500,
-            padding: '6px 16px', border: '1px solid var(--accent)', borderRadius: '6px',
-          }}>
-            Sign In
-          </Link>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            {navLinks.map(({ label, to }) => (
+              <Link key={to} to={to} style={{
+                fontSize: '13px', fontWeight: pathname === to ? 600 : 400,
+                color: pathname === to ? '#0f0f1a' : '#888',
+                textDecoration: 'none', padding: '6px 12px', borderRadius: '7px',
+                background: pathname === to ? 'rgba(0,0,0,0.05)' : 'transparent',
+              }}>
+                {label}
+              </Link>
+            ))}
+            <Link to="/login" style={{
+              marginLeft: '8px', fontSize: '13px', fontWeight: 700,
+              color: '#fff', textDecoration: 'none',
+              padding: '7px 16px', borderRadius: '8px',
+              background: 'linear-gradient(135deg, #00c896, #6c63ff)',
+              boxShadow: '0 3px 10px rgba(108,99,255,0.3)',
+            }}>
+              Sign In
+            </Link>
+          </div>
         </div>
       </header>
 
       {/* Content */}
-      <main style={{ flex: 1, maxWidth: '900px', margin: '0 auto', padding: '48px 24px', width: '100%' }}>
+      <main style={{ flex: 1, maxWidth: '1000px', margin: '0 auto', padding: '56px 24px 80px', width: '100%' }}>
         {children}
       </main>
 
-      {/* Footer */}
-      <footer style={{ borderTop: '1px solid var(--border)', background: 'var(--bg-secondary)', padding: '32px 24px' }}>
-        <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '16px 24px', marginBottom: '20px' }}>
-            {footerLinks.map(link => (
-              <Link key={link.to} to={link.to} style={{
-                fontSize: '13px', textDecoration: 'none',
-                color: pathname === link.to ? 'var(--accent)' : 'var(--text-secondary)',
-              }}>
-                {link.label}
-              </Link>
-            ))}
-          </div>
-          <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>
-            © {new Date().getFullYear()} MailForge. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }

@@ -11,12 +11,12 @@ export default async function handler(req, res) {
 
     await sgMail.send({
       to,
-      from: { email: process.env.FROM_EMAIL, name: process.env.FROM_NAME || 'MailForge' },
-      subject: 'Test Email — MailForge',
+      from: { email: process.env.FROM_EMAIL, name: process.env.FROM_NAME || 'MailRax' },
+      subject: 'Test Email — MailRax',
       html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px;">
         <h2 style="color:#6c63ff;">Test Email</h2>
         <p>Your SendGrid configuration is working correctly!</p>
-        <p style="color:#888;font-size:13px;">Sent from <strong>MailForge</strong>.</p>
+        <p style="color:#888;font-size:13px;">Sent from <strong>MailRax</strong>.</p>
       </div>`,
     });
     return res.status(200).json({ success: true });

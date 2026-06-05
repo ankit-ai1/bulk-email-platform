@@ -18,16 +18,16 @@ export default function TermsOfServicePage() {
         <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}>Last updated: June 1, 2026</p>
         <h1 style={{ fontSize: '32px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '12px' }}>Terms of Service</h1>
         <p style={{ fontSize: '15px', color: 'var(--text-secondary)' }}>
-          By accessing or using MailForge, you agree to be bound by these Terms of Service. Please read them carefully.
+          By accessing or using MailRax, you agree to be bound by these Terms of Service. Please read them carefully.
         </p>
       </div>
 
       <Section title="1. Acceptance of Terms">
-        <p>By creating an account or using MailForge in any way, you agree to these Terms of Service and our Privacy Policy. If you do not agree, do not use the platform.</p>
+        <p>By creating an account or using MailRax in any way, you agree to these Terms of Service and our Privacy Policy. If you do not agree, do not use the platform.</p>
       </Section>
 
       <Section title="2. Eligibility">
-        <p>You must be at least 18 years old and capable of forming a binding contract to use MailForge. By using our service, you represent that you meet these requirements.</p>
+        <p>You must be at least 18 years old and capable of forming a binding contract to use MailRax. By using our service, you represent that you meet these requirements.</p>
       </Section>
 
       <Section title="3. Your Account">
@@ -40,7 +40,7 @@ export default function TermsOfServicePage() {
       </Section>
 
       <Section title="4. Acceptable Use">
-        <p>You agree to use MailForge only for lawful purposes. You must not:</p>
+        <p>You agree to use MailRax only for lawful purposes. You must not:</p>
         <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
           <li>Send unsolicited bulk email (spam) to recipients who have not opted in.</li>
           <li>Use the platform to distribute malware, phishing content, or illegal material.</li>
@@ -55,11 +55,11 @@ export default function TermsOfServicePage() {
       </Section>
 
       <Section title="6. Intellectual Property">
-        <p>MailForge and its content, features, and functionality are owned by us and are protected by applicable intellectual property laws. You retain ownership of the content you create and upload to the platform.</p>
+        <p>MailRax and its content, features, and functionality are owned by us and are protected by applicable intellectual property laws. You retain ownership of the content you create and upload to the platform.</p>
       </Section>
 
       <Section title="7. Limitation of Liability">
-        <p>To the maximum extent permitted by law, MailForge shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of the service. Our total liability shall not exceed the amount you paid us in the past 12 months.</p>
+        <p>To the maximum extent permitted by law, MailRax shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of the service. Our total liability shall not exceed the amount you paid us in the past 12 months.</p>
       </Section>
 
       <Section title="8. Termination">
@@ -71,7 +71,7 @@ export default function TermsOfServicePage() {
       </Section>
 
       <Section title="10. Contact">
-        <p>Questions about these Terms? Contact us at: <a href="mailto:legal@mailforge.app" style={{ color: 'var(--accent)' }}>legal@mailforge.app</a></p>
+        <p>Questions about these Terms? Contact us at: <a href="mailto:legal@mailrax.app" style={{ color: 'var(--accent)' }}>legal@mailrax.app</a></p>
       </Section>
     </PublicLayout>
   )

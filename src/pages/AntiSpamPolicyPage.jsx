@@ -18,7 +18,7 @@ export default function AntiSpamPolicyPage() {
         <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}>Last updated: June 1, 2026</p>
         <h1 style={{ fontSize: '32px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '12px' }}>Anti-Spam Policy</h1>
         <p style={{ fontSize: '15px', color: 'var(--text-secondary)' }}>
-          MailForge has a zero-tolerance policy for spam. This policy outlines our requirements for responsible email sending.
+          MailRax has a zero-tolerance policy for spam. This policy outlines our requirements for responsible email sending.
         </p>
       </div>
 
@@ -37,7 +37,7 @@ export default function AntiSpamPolicyPage() {
       </Section>
 
       <Section title="3. Prohibited Content">
-        <p>You may not use MailForge to send:</p>
+        <p>You may not use MailRax to send:</p>
         <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
           <li>Unsolicited commercial email (spam).</li>
           <li>Phishing or fraudulent messages designed to deceive recipients.</li>
@@ -77,7 +77,7 @@ export default function AntiSpamPolicyPage() {
       </Section>
 
       <Section title="7. Reporting Spam">
-        <p>If you receive spam sent via MailForge, please report it to: <a href="mailto:abuse@mailforge.app" style={{ color: 'var(--accent)' }}>abuse@mailforge.app</a>. We investigate all reports and take appropriate action.</p>
+        <p>If you receive spam sent via MailRax, please report it to: <a href="mailto:abuse@mailrax.app" style={{ color: 'var(--accent)' }}>abuse@mailrax.app</a>. We investigate all reports and take appropriate action.</p>
       </Section>
     </PublicLayout>
   )

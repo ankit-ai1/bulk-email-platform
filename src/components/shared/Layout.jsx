@@ -80,7 +80,7 @@ export default function Layout() {
             <div style={{
               fontFamily: 'var(--font-display)', fontWeight: 800,
               fontSize: '16px', color: 'var(--text-primary)', lineHeight: 1
-            }}>MailForge</div>
+            }}>MailRax</div>
             <div style={{ fontSize: '10px', color: 'var(--text-muted)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
               Campaign Platform
             </div>
@@ -191,7 +191,7 @@ export default function Layout() {
             }}>
               <Zap size={16} color="white" />
             </div>
-            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '16px' }}>MailForge</span>
+            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '16px' }}>MailRax</span>
           </div>
           <button
             onClick={() => setMobileOpen(!mobileOpen)}

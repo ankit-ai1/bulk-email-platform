@@ -1,108 +1,195 @@
-import PublicLayout from '../components/shared/PublicLayout'
-import { Zap, Shield, BarChart2, Users } from 'lucide-react'
+import { Link, useLocation } from 'react-router-dom'
+import SiteFooter from '../components/shared/SiteFooter'
+import { Zap, Shield, BarChart2, Users, CheckCircle, ArrowRight, Globe, Lock, Sparkles, Building2 } from 'lucide-react'
 
 const values = [
-  {
-    icon: Zap,
-    title: 'Speed & Reliability',
-    description: 'Built for high-volume sending with robust infrastructure that delivers your campaigns on time, every time.',
-  },
-  {
-    icon: Shield,
-    title: 'Trust & Compliance',
-    description: 'We take email compliance seriously. Our platform is built around best practices for CAN-SPAM, GDPR, and CASL.',
-  },
-  {
-    icon: BarChart2,
-    title: 'Data-Driven',
-    description: 'Detailed logs and analytics give you full visibility into campaign performance and delivery outcomes.',
-  },
-  {
-    icon: Users,
-    title: 'User First',
-    description: 'We build features our users actually need — a clean interface with no unnecessary complexity.',
-  },
+  { icon: Shield, title: 'Compliance First', description: 'Every account goes through domain verification and anti-abuse review. We enforce strict opt-in requirements and complaint monitoring — responsible sending is non-negotiable.', color: '#00c896' },
+  { icon: Globe, title: 'Your Domain, Your Reputation', description: 'Unlike shared-sender platforms, MailRax lets businesses send from their own verified domains — full control over sender reputation and brand identity.', color: '#6c63ff' },
+  { icon: BarChart2, title: 'Full Visibility', description: 'Real-time delivery logs, campaign analytics, and failure tracking give you complete insight into every email sent. No black boxes — just clear data.', color: '#f59e0b' },
+  { icon: Lock, title: 'Anti-Abuse Controls', description: 'Active monitoring of sending patterns, complaint rates, and bounce thresholds. Accounts that violate policies are suspended before impacting other senders.', color: '#ef4444' },
+  { icon: Users, title: 'Built for Businesses', description: 'From early-stage startups to enterprises, MailRax scales with your needs. Manage multiple sender identities, contact lists, and campaigns in one place.', color: '#8b5cf6' },
+  { icon: Zap, title: 'Reliable Infrastructure', description: 'Enterprise-grade email delivery with high-throughput sending capabilities and a 99.9% uptime SLA — so your campaigns go out on time, every time.', color: '#06b6d4' },
 ]
+
+const capabilities = [
+  'Transactional email delivery via verified business domains',
+  'Permission-based bulk marketing campaign management',
+  'Multi-sender identity management with domain verification',
+  'Contact list management with CSV import and segmentation',
+  'Rich HTML email templates with live personalization preview',
+  'Real-time delivery logs and campaign performance analytics',
+  'Automated bounce and complaint rate monitoring',
+  'CAN-SPAM, GDPR, and CASL compliance enforcement',
+]
+
+const stats = [
+  { value: '99.9%', label: 'Uptime SLA', color: '#00c896' },
+  { value: 'Zero', label: 'Spam Tolerance', color: '#ef4444' },
+  { value: '100%', label: 'Domain Verified', color: '#6c63ff' },
+  { value: '< 2s', label: 'Avg. Latency', color: '#f59e0b' },
+]
+
+function Navbar() {
+  const { pathname } = useLocation()
+  return (
+    <nav style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      padding: '0 48px', height: '64px',
+      borderBottom: '1px solid rgba(0,0,0,0.07)',
+      background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(16px)',
+      position: 'sticky', top: 0, zIndex: 100,
+    }}>
+      <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
+        <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'linear-gradient(135deg,#00c896,#6c63ff)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(108,99,255,0.25)' }}>
+          <Zap size={15} color="#fff" fill="#fff" />
+        </div>
+        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '18px', color: '#0f0f1a' }}>MailRax</span>
+      </Link>
+      <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+        {[['Home','/'],['About','/about'],['Pricing','/pricing'],['Contact','/contact']].map(([l,t]) => {
+          const active = pathname === t
+          return (
+          <Link key={t} to={t} style={{ color: active ? '#0f0f1a' : '#888', textDecoration: 'none', fontSize: '14px', fontWeight: active ? 600 : 400, padding: '7px 14px', borderRadius: '8px', background: active ? 'rgba(0,0,0,0.05)' : 'transparent', transition: 'color 0.15s' }}>{l}</Link>
+          )
+        })}
+        <Link to="/login" style={{ color: '#fff', textDecoration: 'none', fontSize: '14px', fontWeight: 700, padding: '9px 22px', borderRadius: '9px', background: 'linear-gradient(135deg,#00c896,#6c63ff)', marginLeft: '8px', boxShadow: '0 4px 12px rgba(108,99,255,0.25)' }}>Sign In</Link>
+      </div>
+    </nav>
+  )
+}
 
 export default function AboutPage() {
   return (
-    <PublicLayout>
+    <div style={{ minHeight: '100vh', background: '#fff', color: '#0f0f1a', fontFamily: 'var(--font-body)' }}>
+      <Navbar />
+
       {/* Hero */}
-      <div style={{ marginBottom: '56px', textAlign: 'center' }}>
-        <div style={{
-          width: '64px', height: '64px', borderRadius: '16px',
-          background: 'linear-gradient(135deg, #6c63ff, #a78bfa)',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          margin: '0 auto 20px',
-        }}>
-          <Zap size={28} color="white" fill="white" />
-        </div>
-        <h1 style={{ fontSize: '36px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '16px' }}>About MailForge</h1>
-        <p style={{ fontSize: '16px', color: 'var(--text-secondary)', maxWidth: '560px', margin: '0 auto', lineHeight: '1.7' }}>
-          MailForge is a bulk email platform built for businesses and developers who need reliable, scalable email delivery without the complexity.
-        </p>
-      </div>
-
-      {/* Mission */}
-      <div style={{
-        background: 'var(--bg-card)', border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-md)', padding: '32px', marginBottom: '48px',
-      }}>
-        <h2 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '12px' }}>Our Mission</h2>
-        <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: '1.8' }}>
-          Email is one of the most powerful channels for reaching your audience — but most platforms make it harder than it needs to be.
-          MailForge exists to give businesses a straightforward, powerful tool to manage contacts, create templates,
-          send campaigns, and track results — all from one clean interface.
-          We believe responsible email sending is good for everyone, so we've built compliance and best practices into every part of our platform.
-        </p>
-      </div>
-
-      {/* Values */}
-      <h2 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '20px' }}>What We Stand For</h2>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(380px, 1fr))', gap: '16px', marginBottom: '48px' }}>
-        {values.map(({ icon: Icon, title, description }) => (
-          <div key={title} style={{
-            background: 'var(--bg-card)', border: '1px solid var(--border)',
-            borderRadius: 'var(--radius-md)', padding: '24px',
-            display: 'flex', gap: '16px',
-          }}>
-            <div style={{
-              width: '40px', height: '40px', borderRadius: '10px', flexShrink: 0,
-              background: 'rgba(108,99,255,0.12)', border: '1px solid rgba(108,99,255,0.2)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-            }}>
-              <Icon size={18} color="var(--accent)" />
-            </div>
-            <div>
-              <h3 style={{ fontSize: '15px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '6px' }}>{title}</h3>
-              <p style={{ fontSize: '13px', color: 'var(--text-secondary)', lineHeight: '1.7' }}>{description}</p>
-            </div>
+      <section style={{ padding: '80px 48px 64px', background: 'linear-gradient(160deg,#f0f4ff 0%,#fff8ff 50%,#f0fff8 100%)', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: '-60px', right: '10%', width: '320px', height: '320px', borderRadius: '50%', background: 'radial-gradient(circle,rgba(108,99,255,0.1),transparent 70%)', pointerEvents: 'none' }} />
+        <div style={{ maxWidth: '1280px', margin: '0 auto', position: 'relative' }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(0,200,150,0.1)', border: '1px solid rgba(0,200,150,0.25)', borderRadius: '20px', padding: '6px 16px', marginBottom: '24px', fontSize: '11px', fontWeight: 700, color: '#059669', letterSpacing: '0.08em' }}>
+            <Building2 size={12} /> ABOUT MAILRAX
           </div>
-        ))}
-      </div>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 'clamp(32px,5vw,58px)', lineHeight: '1.1', maxWidth: '800px', marginBottom: '22px', letterSpacing: '-0.02em', color: '#0f0f1a' }}>
+            A SaaS Email Platform Built on{' '}
+            <span style={{ background: 'linear-gradient(135deg,#00c896,#6c63ff)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
+              Trust and Compliance
+            </span>
+          </h1>
+          <p style={{ fontSize: '17px', color: '#666', lineHeight: '1.85', maxWidth: '680px', marginBottom: '36px' }}>
+            MailRax enables businesses to send transactional and permission-based marketing emails using their own verified domains — with stricter compliance controls and anti-abuse enforcement built in from day one.
+          </p>
+          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+            <Link to="/pricing" style={{ background: 'linear-gradient(135deg,#00c896,#6c63ff)', color: '#fff', textDecoration: 'none', fontSize: '14px', fontWeight: 700, padding: '12px 28px', borderRadius: '9px', display: 'inline-flex', alignItems: 'center', gap: '8px', boxShadow: '0 6px 20px rgba(108,99,255,0.25)' }}>
+              Apply for Access <ArrowRight size={15} />
+            </Link>
+            <Link to="/contact" style={{ background: '#fff', border: '1.5px solid rgba(0,0,0,0.1)', color: '#333', textDecoration: 'none', fontSize: '14px', fontWeight: 600, padding: '12px 28px', borderRadius: '9px' }}>
+              Contact Us
+            </Link>
+          </div>
+        </div>
+      </section>
 
-      {/* What we offer */}
-      <div style={{
-        background: 'var(--bg-card)', border: '1px solid var(--border)',
-        borderRadius: 'var(--radius-md)', padding: '32px',
-      }}>
-        <h2 style={{ fontSize: '20px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '16px' }}>What MailForge Offers</h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {[
-            'Campaign management with scheduling and real-time status tracking',
-            'Contact list management with CSV import and segmentation',
-            'Rich HTML email templates with live preview',
-            'Multi-sender email verification for flexible sending identities',
-            'Detailed delivery logs with open and failure tracking',
-            'SendGrid-powered delivery infrastructure for high deliverability',
-          ].map(item => (
-            <div key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', fontSize: '14px', color: 'var(--text-secondary)' }}>
-              <span style={{ color: 'var(--accent-3)', marginTop: '2px', flexShrink: 0 }}>✓</span>
-              <span>{item}</span>
+      {/* Stats */}
+      <section style={{ padding: '64px 48px' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '16px' }}>
+          {stats.map(({ value, label, color }) => (
+            <div key={label} style={{ background: '#f8f9fc', border: '1.5px solid rgba(0,0,0,0.06)', borderRadius: '16px', padding: '28px 20px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: `linear-gradient(90deg,transparent,${color},transparent)` }} />
+              <div style={{ fontFamily: 'var(--font-display)', fontSize: '34px', fontWeight: 900, color, marginBottom: '6px' }}>{value}</div>
+              <div style={{ fontSize: '12px', color: '#888', fontWeight: 500 }}>{label}</div>
             </div>
           ))}
         </div>
-      </div>
-    </PublicLayout>
+      </section>
+
+      {/* What sets us apart */}
+      <section style={{ padding: '0 48px 64px' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+          <div style={{ background: 'linear-gradient(135deg,#f0f4ff,#f0fff8)', border: '1.5px solid rgba(0,200,150,0.15)', borderRadius: '20px', padding: '48px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '24px' }}>
+              <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(0,200,150,0.1)', border: '1px solid rgba(0,200,150,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <Sparkles size={20} color="#00c896" />
+              </div>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(20px,3vw,28px)', fontWeight: 800, color: '#0f0f1a' }}>What Sets MailRax Apart</h2>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', paddingLeft: '58px' }}>
+              {[
+                'Most bulk email tools prioritize volume over responsibility. MailRax takes the opposite approach. Before any account can send, it must complete domain verification, agree to our anti-spam policies, and pass our onboarding compliance checks.',
+                'This approach protects every sender on our platform. When bad actors can\'t get in, the reputation of our shared infrastructure stays strong — which directly benefits your deliverability.',
+                'We believe responsible email sending is not a competitive disadvantage — it\'s a long-term business advantage. Businesses that send to engaged, opted-in audiences consistently outperform those that spray and pray.',
+              ].map((text, i) => (
+                <p key={i} style={{ fontSize: '15px', color: '#666', lineHeight: '1.85' }}>{text}</p>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Capabilities */}
+      <section style={{ padding: '0 48px 64px', background: '#f8f9fc' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto', paddingTop: '64px', paddingBottom: '64px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(22px,3vw,34px)', fontWeight: 800, color: '#0f0f1a', marginBottom: '10px' }}>Platform Capabilities</h2>
+            <p style={{ fontSize: '15px', color: '#888', maxWidth: '480px', margin: '0 auto' }}>Everything your business needs to send email at scale — responsibly.</p>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(320px,1fr))', gap: '10px' }}>
+            {capabilities.map(item => (
+              <div key={item} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', background: '#fff', border: '1.5px solid rgba(0,0,0,0.06)', borderRadius: '12px', padding: '16px 18px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+                <div style={{ width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(0,200,150,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '1px' }}>
+                  <CheckCircle size={12} color="#00c896" />
+                </div>
+                <span style={{ fontSize: '13px', color: '#555', lineHeight: '1.65' }}>{item}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Core principles */}
+      <section style={{ padding: '64px 48px' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+          <div style={{ textAlign: 'center', marginBottom: '40px' }}>
+            <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(22px,3vw,34px)', fontWeight: 800, color: '#0f0f1a', marginBottom: '10px' }}>Our Core Principles</h2>
+            <p style={{ fontSize: '15px', color: '#888', maxWidth: '480px', margin: '0 auto' }}>Not just values we list — built into how the platform works.</p>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(320px,1fr))', gap: '16px' }}>
+            {values.map(({ icon: Icon, title, description, color }) => (
+              <div key={title} style={{ background: '#fff', border: '1.5px solid rgba(0,0,0,0.06)', borderRadius: '16px', padding: '28px', boxShadow: '0 4px 16px rgba(0,0,0,0.05)', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: `linear-gradient(90deg,${color},transparent)` }} />
+                <div style={{ width: '44px', height: '44px', borderRadius: '12px', marginBottom: '18px', background: `${color}12`, border: `1px solid ${color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Icon size={20} color={color} />
+                </div>
+                <h3 style={{ fontSize: '15px', fontWeight: 700, color: '#0f0f1a', marginBottom: '10px' }}>{title}</h3>
+                <p style={{ fontSize: '13px', color: '#888', lineHeight: '1.8' }}>{description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Who we serve */}
+      <section style={{ padding: '0 48px 64px' }}>
+        <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
+          <div style={{ background: '#f8f9fc', border: '1.5px solid rgba(0,0,0,0.06)', borderRadius: '20px', padding: '48px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: '40px' }}>
+            <div>
+              <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '24px', fontWeight: 800, color: '#0f0f1a', marginBottom: '16px' }}>Who We Serve</h2>
+              <p style={{ fontSize: '14px', color: '#888', lineHeight: '1.9', marginBottom: '14px' }}>MailRax is designed for businesses that send meaningful, permission-based emails — SaaS companies, e-commerce brands, agencies, and enterprises.</p>
+              <p style={{ fontSize: '14px', color: '#888', lineHeight: '1.9' }}>If you send spam, purchase email lists, or engage in deceptive practices — MailRax is not the right platform for you.</p>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', justifyContent: 'center' }}>
+              {['SaaS companies sending product updates','E-commerce brands running promotions','Agencies managing client email operations','Enterprises needing transactional email infrastructure'].map(item => (
+                <div key={item} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: '#fff', border: '1.5px solid rgba(0,200,150,0.15)', borderRadius: '9px', padding: '12px 14px', boxShadow: '0 2px 8px rgba(0,0,0,0.04)' }}>
+                  <CheckCircle size={14} color="#00c896" style={{ flexShrink: 0 }} />
+                  <span style={{ fontSize: '13px', color: '#555' }}>{item}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <SiteFooter />
+    </div>
   )
 }

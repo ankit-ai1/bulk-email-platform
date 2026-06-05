@@ -18,11 +18,14 @@ import AntiSpamPolicyPage from './pages/AntiSpamPolicyPage'
 import AcceptableUsePolicyPage from './pages/AcceptableUsePolicyPage'
 import ContactPage from './pages/ContactPage'
 import AboutPage from './pages/AboutPage'
+import LandingPage from './pages/LandingPage'
+import PricingPage from './pages/PricingPage'
+import ApplyPage from './pages/ApplyPage'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
   if (loading) return <LoadingScreen />
-  if (!user) return <Navigate to="/login" replace />
+  if (!user) return <LandingPage />
   return children
 }
 
@@ -56,6 +59,8 @@ function AppRoutes() {
       <Route path="/acceptable-use-policy" element={<AcceptableUsePolicyPage />} />
       <Route path="/contact" element={<ContactPage />} />
       <Route path="/about" element={<AboutPage />} />
+      <Route path="/pricing" element={<PricingPage />} />
+      <Route path="/apply" element={<ApplyPage />} />
       <Route path="/" element={
         <ProtectedRoute>
           <Layout />

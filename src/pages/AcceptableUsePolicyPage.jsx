@@ -18,12 +18,12 @@ export default function AcceptableUsePolicyPage() {
         <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}>Last updated: June 1, 2026</p>
         <h1 style={{ fontSize: '32px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '12px' }}>Acceptable Use Policy</h1>
         <p style={{ fontSize: '15px', color: 'var(--text-secondary)' }}>
-          This Acceptable Use Policy defines what is and is not permitted when using MailForge. All users must comply with this policy.
+          This Acceptable Use Policy defines what is and is not permitted when using MailRax. All users must comply with this policy.
         </p>
       </div>
 
       <Section title="1. Permitted Uses">
-        <p>MailForge may be used for:</p>
+        <p>MailRax may be used for:</p>
         <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
           <li>Sending newsletters and marketing emails to opted-in subscribers.</li>
           <li>Transactional emails such as order confirmations, receipts, and notifications.</li>
@@ -34,7 +34,7 @@ export default function AcceptableUsePolicyPage() {
       </Section>
 
       <Section title="2. Prohibited Uses">
-        <p>You must not use MailForge to:</p>
+        <p>You must not use MailRax to:</p>
         <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
           <li>Send spam or unsolicited emails to recipients without prior consent.</li>
           <li>Distribute malware, ransomware, viruses, or other harmful software.</li>
@@ -49,7 +49,7 @@ export default function AcceptableUsePolicyPage() {
       </Section>
 
       <Section title="3. Prohibited Content Categories">
-        <p>The following content categories are explicitly prohibited on MailForge:</p>
+        <p>The following content categories are explicitly prohibited on MailRax:</p>
         <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
           <li>Adult content sent to minors or without age verification.</li>
           <li>Content promoting violence, hatred, or discrimination.</li>
@@ -80,7 +80,7 @@ export default function AcceptableUsePolicyPage() {
       </Section>
 
       <Section title="6. Contact">
-        <p>To report a violation or ask questions about this policy: <a href="mailto:abuse@mailforge.app" style={{ color: 'var(--accent)' }}>abuse@mailforge.app</a></p>
+        <p>To report a violation or ask questions about this policy: <a href="mailto:abuse@mailrax.app" style={{ color: 'var(--accent)' }}>abuse@mailrax.app</a></p>
       </Section>
     </PublicLayout>
   )
