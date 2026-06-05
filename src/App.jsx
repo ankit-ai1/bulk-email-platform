@@ -12,6 +12,12 @@ import LogsPage from './pages/LogsPage'
 import SettingsPage from './pages/SettingsPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import ConfirmEmailPage from './pages/ConfirmEmailPage'
+import PrivacyPolicyPage from './pages/PrivacyPolicyPage'
+import TermsOfServicePage from './pages/TermsOfServicePage'
+import AntiSpamPolicyPage from './pages/AntiSpamPolicyPage'
+import AcceptableUsePolicyPage from './pages/AcceptableUsePolicyPage'
+import ContactPage from './pages/ContactPage'
+import AboutPage from './pages/AboutPage'
 
 function ProtectedRoute({ children }) {
   const { user, loading } = useAuth()
@@ -44,6 +50,12 @@ function AppRoutes() {
       <Route path="/login" element={user ? <Navigate to="/" replace /> : <LoginPage />} />
       <Route path="/confirm-email" element={<ConfirmEmailPage />} />
       <Route path="/reset-password" element={<ResetPasswordPage />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicyPage />} />
+      <Route path="/terms-of-service" element={<TermsOfServicePage />} />
+      <Route path="/anti-spam-policy" element={<AntiSpamPolicyPage />} />
+      <Route path="/acceptable-use-policy" element={<AcceptableUsePolicyPage />} />
+      <Route path="/contact" element={<ContactPage />} />
+      <Route path="/about" element={<AboutPage />} />
       <Route path="/" element={
         <ProtectedRoute>
           <Layout />
