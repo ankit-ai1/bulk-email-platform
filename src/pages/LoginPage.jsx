@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { Zap, Mail, Lock, User, Eye, EyeOff, ArrowRight, ArrowLeft, KeyRound } from 'lucide-react'
+import SiteFooter from '../components/shared/SiteFooter'
 
 const REMEMBER_KEY = 'mailrax_remembered_email'
 
@@ -84,8 +85,9 @@ export default function LoginPage() {
   }
 
   return (
+    <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column' }}>
     <div style={{
-      minHeight: '100vh', background: 'var(--bg-primary)',
+      flex: 1,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       padding: '20px', position: 'relative', overflow: 'hidden',
     }}>
@@ -340,6 +342,8 @@ export default function LoginPage() {
           Bulk Email Campaign Platform · Secure & Private
         </p>
       </div>
+    </div>
+    <SiteFooter />
     </div>
   )
 }

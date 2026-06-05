@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { Zap, Eye, EyeOff, Lock, CheckCircle } from 'lucide-react'
+import SiteFooter from '../components/shared/SiteFooter'
 
 export default function ResetPasswordPage() {
   const navigate = useNavigate()
@@ -29,8 +30,9 @@ export default function ResetPasswordPage() {
   }
 
   return (
+    <div style={{ minHeight: '100vh', background: 'var(--bg-primary)', display: 'flex', flexDirection: 'column' }}>
     <div style={{
-      minHeight: '100vh', background: 'var(--bg-primary)',
+      flex: 1,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       padding: '20px', position: 'relative', overflow: 'hidden',
     }}>
@@ -110,6 +112,8 @@ export default function ResetPasswordPage() {
           )}
         </div>
       </div>
+    </div>
+    <SiteFooter />
     </div>
   )
 }

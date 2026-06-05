@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { supabase } from '../lib/supabase'
 import toast from 'react-hot-toast'
 import { Mail, CheckCircle, AlertCircle, Loader } from 'lucide-react'
+import SiteFooter from '../components/shared/SiteFooter'
 
 export default function ConfirmEmailPage() {
   const navigate = useNavigate()
@@ -87,11 +88,12 @@ export default function ConfirmEmailPage() {
   }, [location, navigate])
 
   return (
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
     <div style={{
+      flex: 1,
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      minHeight: '100vh',
       background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
       padding: '20px',
     }}>
@@ -230,6 +232,8 @@ export default function ConfirmEmailPage() {
           to { transform: rotate(360deg); }
         }
       `}</style>
+    </div>
+    <SiteFooter />
     </div>
   )
 }
