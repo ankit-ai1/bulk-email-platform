@@ -1,5 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
+import SiteNavbar from '../components/shared/SiteNavbar'
+import SiteFooter from '../components/shared/SiteFooter'
 import { Zap, ArrowRight, CheckCircle, Star, Shield, BarChart2, Send, Users, Globe, Mail, TrendingUp, Layers, Database, ChevronRight } from 'lucide-react'
 
 /* ─── scroll animation hook ─── */
@@ -433,36 +435,10 @@ export default function LandingPage() {
         .cta-ghost:hover { transform: translateY(-2px); background: #fff !important; }
       `}</style>
 
-      {/* ── Navbar ── */}
-      <nav style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 48px', height: '64px',
-        borderBottom: '1px solid rgba(0,0,0,0.06)',
-        background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(16px)',
-        position: 'sticky', top: 0, zIndex: 100,
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'linear-gradient(135deg,#00c896,#6c63ff)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(108,99,255,0.3)' }}>
-            <Zap size={15} color="#fff" fill="#fff" />
-          </div>
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '18px', color: '#0f0f1a' }}>MailRax</span>
-        </div>
-        <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-          {[['Home','/'],['About','/about'],['Pricing','/pricing'],['Contact','/contact']].map(([l,t]) => {
-            const active = pathname === t
-            return (
-            <Link key={t} to={t} style={{ color: active ? '#0f0f1a' : '#666', textDecoration: 'none', fontSize: '14px', fontWeight: active ? 600 : 500, padding: '7px 14px', borderRadius: '8px', background: active ? 'rgba(0,0,0,0.05)' : 'transparent', transition: 'color 0.15s' }}>{l}</Link>
-            )
-          })}
-          <Link to="/login" style={{ color: '#666', textDecoration: 'none', fontSize: '14px', fontWeight: 500, padding: '8px 16px' }}>Sign In</Link>
-          <Link to="/pricing" style={{ background: 'linear-gradient(135deg,#00c896,#6c63ff)', color: '#fff', textDecoration: 'none', fontSize: '14px', fontWeight: 700, padding: '9px 22px', borderRadius: '9px', boxShadow: '0 4px 14px rgba(108,99,255,0.3)' }}>
-            Apply for Access
-          </Link>
-        </div>
-      </nav>
+      <SiteNavbar />
 
       {/* ── Hero ── */}
-      <section style={{ padding: '88px 48px 0', background: 'linear-gradient(150deg,#f0f4ff 0%,#fdf8ff 45%,#f0fff8 100%)', position: 'relative', overflow: 'hidden', minHeight: '700px' }}>
+      <section className="pub-pad" style={{ paddingTop: '88px', paddingBottom: 0, background: 'linear-gradient(150deg,#f0f4ff 0%,#fdf8ff 45%,#f0fff8 100%)', position: 'relative', overflow: 'hidden', minHeight: '600px' }}>
 
         {/* Animated bg orbs */}
         <div className="orb1" style={{ position: 'absolute', top: '-120px', left: '8%', width: '520px', height: '520px', borderRadius: '50%', background: 'radial-gradient(circle,rgba(108,99,255,0.13),transparent 68%)', pointerEvents: 'none' }} />
@@ -472,7 +448,7 @@ export default function LandingPage() {
         {/* Subtle grid */}
         <div style={{ position: 'absolute', inset: 0, backgroundImage: 'linear-gradient(rgba(108,99,255,0.035) 1px,transparent 1px),linear-gradient(90deg,rgba(108,99,255,0.035) 1px,transparent 1px)', backgroundSize: '52px 52px', pointerEvents: 'none' }} />
 
-        <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '72px', alignItems: 'center', position: 'relative' }}>
+        <div className="pub-hero-grid" style={{ maxWidth: '1280px', margin: '0 auto' }}>
 
           {/* ── Left copy ── */}
           <div>
@@ -523,13 +499,13 @@ export default function LandingPage() {
           </div>
 
           {/* ── Right mockup + floating cards ── */}
-          <div className="hero-right" style={{ position: 'relative', paddingBottom: '32px' }}>
+          <div className="hero-right pub-hero-right" style={{ paddingBottom: '32px' }}>
             <div className="mock-float">
               <HeroVisual />
             </div>
 
             {/* Floating card 1 — delivered */}
-            <div className="fc1" style={{ position: 'absolute', top: '18px', right: '-28px', background: '#fff', borderRadius: '14px', padding: '11px 15px', boxShadow: '0 12px 40px rgba(0,0,0,0.13)', border: '1px solid rgba(0,200,150,0.22)', display: 'flex', alignItems: 'center', gap: '10px', minWidth: '192px', zIndex: 10 }}>
+            <div className="fc1 pub-fc" style={{ position: 'absolute', top: '18px', right: '-28px', background: '#fff', borderRadius: '14px', padding: '11px 15px', boxShadow: '0 12px 40px rgba(0,0,0,0.13)', border: '1px solid rgba(0,200,150,0.22)', display: 'flex', alignItems: 'center', gap: '10px', minWidth: '192px', zIndex: 10 }}>
               <div style={{ width: '34px', height: '34px', borderRadius: '9px', background: 'rgba(0,200,150,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <CheckCircle size={16} color="#00c896" />
               </div>
@@ -540,7 +516,7 @@ export default function LandingPage() {
             </div>
 
             {/* Floating card 2 — open rate */}
-            <div className="fc2" style={{ position: 'absolute', bottom: '54px', left: '-28px', background: '#fff', borderRadius: '14px', padding: '11px 15px', boxShadow: '0 12px 40px rgba(0,0,0,0.13)', border: '1px solid rgba(108,99,255,0.22)', display: 'flex', alignItems: 'center', gap: '10px', minWidth: '172px', zIndex: 10 }}>
+            <div className="fc2 pub-fc" style={{ position: 'absolute', bottom: '54px', left: '-28px', background: '#fff', borderRadius: '14px', padding: '11px 15px', boxShadow: '0 12px 40px rgba(0,0,0,0.13)', border: '1px solid rgba(108,99,255,0.22)', display: 'flex', alignItems: 'center', gap: '10px', minWidth: '172px', zIndex: 10 }}>
               <div style={{ width: '34px', height: '34px', borderRadius: '9px', background: 'rgba(108,99,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <TrendingUp size={16} color="#6c63ff" />
               </div>
@@ -551,7 +527,7 @@ export default function LandingPage() {
             </div>
 
             {/* Floating card 3 — spam shield */}
-            <div className="fc3" style={{ position: 'absolute', top: '44%', right: '-36px', background: '#fff', borderRadius: '14px', padding: '11px 15px', boxShadow: '0 12px 40px rgba(0,0,0,0.13)', border: '1px solid rgba(245,158,11,0.22)', display: 'flex', alignItems: 'center', gap: '10px', zIndex: 10 }}>
+            <div className="fc3 pub-fc" style={{ position: 'absolute', top: '44%', right: '-36px', background: '#fff', borderRadius: '14px', padding: '11px 15px', boxShadow: '0 12px 40px rgba(0,0,0,0.13)', border: '1px solid rgba(245,158,11,0.22)', display: 'flex', alignItems: 'center', gap: '10px', zIndex: 10 }}>
               <div style={{ width: '34px', height: '34px', borderRadius: '9px', background: 'rgba(245,158,11,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <Shield size={16} color="#f59e0b" />
               </div>
@@ -567,7 +543,7 @@ export default function LandingPage() {
 
 
       {/* ── Stats ── */}
-      <section style={{ padding: '72px 48px', background: '#fff' }}>
+      <section className="pub-pad" style={{ paddingTop: '72px', paddingBottom: '72px', background: '#fff' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
           <Fade>
             <p style={{ textAlign: 'center', fontSize: '14px', fontWeight: 600, color: '#aaa', letterSpacing: '0.08em', marginBottom: '48px' }}>
@@ -588,8 +564,8 @@ export default function LandingPage() {
       </section>
 
       {/* ── Feature 1 — Campaign Management ── */}
-      <section style={{ padding: '80px 48px', background: '#eef2ff' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '80px', alignItems: 'center' }}>
+      <section className="pub-pad" style={{ paddingTop: '80px', paddingBottom: '80px', background: '#eef2ff' }}>
+        <div className="pub-feat-lr" style={{ maxWidth: '1280px', margin: '0 auto' }}>
           <Fade dir="left">
             <CampaignMockup />
           </Fade>
@@ -621,8 +597,8 @@ export default function LandingPage() {
       </section>
 
       {/* ── Feature 2 — Analytics ── */}
-      <section style={{ padding: '80px 48px', background: '#fff9f0' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '80px', alignItems: 'center' }}>
+      <section className="pub-pad" style={{ paddingTop: '80px', paddingBottom: '80px', background: '#fff9f0' }}>
+        <div className="pub-feat-rl" style={{ maxWidth: '1280px', margin: '0 auto' }}>
           <Fade dir="left">
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.25)', borderRadius: '20px', padding: '5px 14px', marginBottom: '20px', fontSize: '11px', fontWeight: 700, color: '#d97706', letterSpacing: '0.07em' }}>
               ANALYTICS + DELIVERABILITY
@@ -654,8 +630,8 @@ export default function LandingPage() {
       </section>
 
       {/* ── Feature 3 — Contact Management ── */}
-      <section style={{ padding: '80px 48px', background: '#f0fff8' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '80px', alignItems: 'center' }}>
+      <section className="pub-pad" style={{ paddingTop: '80px', paddingBottom: '80px', background: '#f0fff8' }}>
+        <div className="pub-feat-rl" style={{ maxWidth: '1280px', margin: '0 auto' }}>
           <Fade dir="left">
             <ContactsMockup />
           </Fade>
@@ -687,7 +663,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Comparison table ── */}
-      <section style={{ padding: '80px 48px', background: '#fff' }}>
+      <section className="pub-pad" style={{ paddingTop: '80px', paddingBottom: '80px', background: '#fff' }}>
         <div style={{ maxWidth: '900px', margin: '0 auto' }}>
           <Fade>
             <div style={{ textAlign: 'center', marginBottom: '48px' }}>
@@ -733,7 +709,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Compliance dark strip ── */}
-      <section style={{ padding: '80px 48px', background: '#0f0f1a', color: '#fff' }}>
+      <section className="pub-pad" style={{ paddingTop: '80px', paddingBottom: '80px', background: '#0f0f1a', color: '#fff' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', gap: '64px', alignItems: 'center', flexWrap: 'wrap' }}>
           <Fade dir="left" style={{ flex: '1 1 320px' }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: 'rgba(0,200,150,0.12)', border: '1px solid rgba(0,200,150,0.25)', borderRadius: '20px', padding: '5px 14px', marginBottom: '20px', fontSize: '11px', fontWeight: 700, color: '#00c896', letterSpacing: '0.07em' }}>
@@ -764,7 +740,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Testimonials ── */}
-      <section style={{ padding: '80px 48px', background: '#f8f9fc' }}>
+      <section className="pub-pad" style={{ paddingTop: '80px', paddingBottom: '80px', background: '#f8f9fc' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
           <Fade>
             <div style={{ textAlign: 'center', marginBottom: '48px' }}>
@@ -774,7 +750,7 @@ export default function LandingPage() {
               <p style={{ fontSize: '15px', color: '#888' }}>Businesses that take email delivery seriously.</p>
             </div>
           </Fade>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(300px,1fr))', gap: '20px' }}>
+          <div className="pub-testi-grid" style={{ gap: '20px' }}>
             {testimonials.map(({ name, role, text, stars }, i) => (
               <Fade key={name} delay={i*0.1}>
                 <div style={{ background: '#fff', borderRadius: '16px', padding: '28px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', border: '1px solid rgba(0,0,0,0.06)', height: '100%', boxSizing: 'border-box' }}>
@@ -797,7 +773,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── Final CTA ── */}
-      <section style={{ padding: '80px 48px', background: 'linear-gradient(135deg,#0f1035 0%,#1a1040 50%,#0f1a35 100%)', position: 'relative', overflow: 'hidden' }}>
+      <section className="pub-pad" style={{ paddingTop: '80px', paddingBottom: '80px', background: 'linear-gradient(135deg,#0f1035 0%,#1a1040 50%,#0f1a35 100%)', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: '-80px', left: '50%', transform: 'translateX(-50%)', width: '600px', height: '400px', background: 'radial-gradient(ellipse,rgba(108,99,255,0.2),transparent 70%)', pointerEvents: 'none' }} />
         <div style={{ position: 'absolute', bottom: '-60px', right: '10%', width: '300px', height: '300px', background: 'radial-gradient(circle,rgba(0,200,150,0.15),transparent 70%)', pointerEvents: 'none' }} />
         <Fade style={{ maxWidth: '640px', margin: '0 auto', textAlign: 'center', position: 'relative' }}>
@@ -824,46 +800,7 @@ export default function LandingPage() {
         </Fade>
       </section>
 
-      {/* ── Footer ── */}
-      <footer style={{ background: '#0a0a14', padding: '52px 48px 32px' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: '40px', marginBottom: '48px' }}>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '9px', marginBottom: '14px' }}>
-                <div style={{ width: '30px', height: '30px', borderRadius: '7px', background: 'linear-gradient(135deg,#00c896,#6c63ff)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Zap size={13} color="#fff" fill="#fff" />
-                </div>
-                <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '17px', color: '#fff' }}>MailRax</span>
-              </div>
-              <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', lineHeight: '1.75' }}>SaaS email delivery for compliant businesses.</p>
-            </div>
-            {[
-              ['Platform', [['Pricing','/pricing'],['About','/about'],['Contact','/contact']]],
-              ['Legal', [['Privacy Policy','/privacy-policy'],['Terms of Service','/terms-of-service'],['Anti-Spam Policy','/anti-spam-policy'],['Acceptable Use','/acceptable-use-policy']]],
-            ].map(([heading, links]) => (
-              <div key={heading}>
-                <div style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>{heading}</div>
-                {links.map(([l,t]) => (
-                  <Link key={t} to={t} style={{ display: 'block', fontSize: '13px', color: 'rgba(255,255,255,0.55)', marginBottom: '10px', textDecoration: 'none' }}>{l}</Link>
-                ))}
-              </div>
-            ))}
-            <div>
-              <div style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '16px' }}>Compliance</div>
-              {['CAN-SPAM','GDPR','CASL','SPF & DKIM'].map(item => (
-                <div key={item} style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '10px' }}>
-                  <CheckCircle size={12} color="#00c896" />
-                  <span style={{ fontSize: '13px', color: 'rgba(255,255,255,0.55)' }}>{item}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-          <div style={{ borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: '24px', display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
-            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>© {new Date().getFullYear()} MailRax. All rights reserved.</p>
-            <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)' }}>Compliant email delivery for serious senders.</p>
-          </div>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }

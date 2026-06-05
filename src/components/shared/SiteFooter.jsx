@@ -3,11 +3,11 @@ import { Zap, CheckCircle } from 'lucide-react'
 
 export default function SiteFooter() {
   return (
-    <footer style={{ background: '#0a0a14', padding: '52px 48px 32px' }}>
+    <footer className="pub-pad" style={{ background: '#0a0a14', paddingTop: '52px', paddingBottom: '32px' }}>
       <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
 
         {/* Top grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: '40px', marginBottom: '48px' }}>
+        <div className="pub-footer-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: '40px', marginBottom: '48px' }}>
 
           {/* Brand */}
           <div>

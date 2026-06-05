@@ -507,3 +507,110 @@ tbody tr:hover { background: var(--bg-elevated); }
   .grid-2, .grid-3 { grid-template-columns: 1fr; }
   .stats-grid { grid-template-columns: 1fr 1fr; }
 }
+
+/* =============================================
+   PUBLIC PAGES — RESPONSIVE LAYOUT CLASSES
+   ============================================= */
+
+/* Navbar */
+.pub-nav        { padding-left: 48px; padding-right: 48px; }
+.site-nav-hamburger { display: none; }
+
+/* Section padding wrapper */
+.pub-pad        { padding-left: 48px; padding-right: 48px; }
+
+/* Hero two-column */
+.pub-hero-grid  { display: grid; grid-template-columns: 1fr 1fr; gap: 72px; align-items: center; position: relative; }
+.pub-hero-right { position: relative; padding-bottom: 32px; }
+.pub-fc         { position: absolute; }
+
+/* Feature sections (alternating L/R) */
+.pub-feat-lr    { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+.pub-feat-rl    { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: center; }
+
+/* Stats row */
+.pub-stats-row  { display: grid; grid-template-columns: repeat(5,1fr); gap: 16px; }
+
+/* Comparison table columns */
+.pub-cmp-row    { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; border-bottom: 1px solid rgba(0,0,0,0.06); }
+.pub-cmp-head   { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; }
+
+/* Testimonials */
+.pub-testi-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+
+/* Plan cards grid */
+.pub-plan-grid  { display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+
+/* Contact cards */
+.pub-contact-grid { display: grid; grid-template-columns: repeat(auto-fill,minmax(280px,1fr)); gap: 16px; }
+
+/* CTA flex strip */
+.pub-cta-strip  { display: flex; justify-content: space-between; align-items: center; gap: 24px; flex-wrap: wrap; }
+
+/* ---- Tablet (≤ 1024px) ---- */
+@media (max-width: 1024px) {
+  .pub-stats-row  { grid-template-columns: repeat(3,1fr); }
+  .pub-plan-grid  { grid-template-columns: repeat(2,1fr); }
+  .pub-testi-grid { grid-template-columns: repeat(2,1fr); }
+  .pub-cmp-row    { grid-template-columns: 2fr 1fr 1fr; }
+  .pub-cmp-head   { grid-template-columns: 2fr 1fr 1fr; }
+  .pub-cmp-row  > *:last-child,
+  .pub-cmp-head > *:last-child { display: none; }
+}
+
+/* ---- Mobile (≤ 768px) ---- */
+@media (max-width: 768px) {
+  /* Navbar */
+  .pub-nav          { padding-left: 16px !important; padding-right: 16px !important; }
+  .site-nav-desktop { display: none !important; }
+  .site-nav-hamburger { display: flex !important; align-items: center; justify-content: center; }
+
+  /* Sections */
+  .pub-pad  { padding-left: 16px !important; padding-right: 16px !important; }
+
+  /* Hero */
+  .pub-hero-grid  { grid-template-columns: 1fr !important; gap: 36px !important; }
+  .pub-hero-right { display: none !important; }
+  .pub-fc         { display: none !important; }
+
+  /* Feature sections */
+  .pub-feat-lr,
+  .pub-feat-rl    { grid-template-columns: 1fr !important; gap: 28px !important; }
+  .pub-feat-rl > *:first-child { order: 2; }
+  .pub-feat-rl > *:last-child  { order: 1; }
+
+  /* Stats */
+  .pub-stats-row  { grid-template-columns: repeat(2,1fr) !important; }
+
+  /* Plans */
+  .pub-plan-grid  { grid-template-columns: 1fr !important; }
+
+  /* Testimonials */
+  .pub-testi-grid { grid-template-columns: 1fr !important; }
+
+  /* Comparison — scroll horizontally */
+  .pub-cmp-wrap   { overflow-x: auto; }
+  .pub-cmp-row,
+  .pub-cmp-head   { grid-template-columns: 1.8fr 1fr 1fr !important; min-width: 480px; }
+  .pub-cmp-row  > *:last-child,
+  .pub-cmp-head > *:last-child { display: none !important; }
+
+  /* CTA strip */
+  .pub-cta-strip  { flex-direction: column; align-items: flex-start; }
+
+  /* SiteFooter */
+  .pub-footer-grid { grid-template-columns: 1fr 1fr !important; gap: 28px !important; }
+
+  /* Hero text sizing */
+  .pub-hero-h1 { font-size: clamp(28px,8vw,48px) !important; }
+
+  /* General section vertical padding */
+  .pub-section-v { padding-top: 48px !important; padding-bottom: 48px !important; }
+}
+
+/* ---- Small mobile (≤ 480px) ---- */
+@media (max-width: 480px) {
+  .pub-stats-row  { grid-template-columns: 1fr 1fr !important; }
+  .pub-footer-grid { grid-template-columns: 1fr !important; }
+  .pub-plan-grid  { grid-template-columns: 1fr !important; }
+}

@@ -1,4 +1,5 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
+import SiteNavbar from '../components/shared/SiteNavbar'
 import SiteFooter from '../components/shared/SiteFooter'
 import { Zap, Shield, BarChart2, Users, CheckCircle, ArrowRight, Globe, Lock, Sparkles, Building2 } from 'lucide-react'
 
@@ -29,42 +30,13 @@ const stats = [
   { value: '< 2s', label: 'Avg. Latency', color: '#f59e0b' },
 ]
 
-function Navbar() {
-  const { pathname } = useLocation()
-  return (
-    <nav style={{
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      padding: '0 48px', height: '64px',
-      borderBottom: '1px solid rgba(0,0,0,0.07)',
-      background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(16px)',
-      position: 'sticky', top: 0, zIndex: 100,
-    }}>
-      <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-        <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'linear-gradient(135deg,#00c896,#6c63ff)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(108,99,255,0.25)' }}>
-          <Zap size={15} color="#fff" fill="#fff" />
-        </div>
-        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '18px', color: '#0f0f1a' }}>MailRax</span>
-      </Link>
-      <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-        {[['Home','/'],['About','/about'],['Pricing','/pricing'],['Contact','/contact']].map(([l,t]) => {
-          const active = pathname === t
-          return (
-          <Link key={t} to={t} style={{ color: active ? '#0f0f1a' : '#888', textDecoration: 'none', fontSize: '14px', fontWeight: active ? 600 : 400, padding: '7px 14px', borderRadius: '8px', background: active ? 'rgba(0,0,0,0.05)' : 'transparent', transition: 'color 0.15s' }}>{l}</Link>
-          )
-        })}
-        <Link to="/login" style={{ color: '#fff', textDecoration: 'none', fontSize: '14px', fontWeight: 700, padding: '9px 22px', borderRadius: '9px', background: 'linear-gradient(135deg,#00c896,#6c63ff)', marginLeft: '8px', boxShadow: '0 4px 12px rgba(108,99,255,0.25)' }}>Sign In</Link>
-      </div>
-    </nav>
-  )
-}
-
 export default function AboutPage() {
   return (
     <div style={{ minHeight: '100vh', background: '#fff', color: '#0f0f1a', fontFamily: 'var(--font-body)' }}>
-      <Navbar />
+      <SiteNavbar />
 
       {/* Hero */}
-      <section style={{ padding: '80px 48px 64px', background: 'linear-gradient(160deg,#f0f4ff 0%,#fff8ff 50%,#f0fff8 100%)', position: 'relative', overflow: 'hidden' }}>
+      <section className="pub-pad" style={{ paddingTop: '80px', paddingBottom: '64px', background: 'linear-gradient(160deg,#f0f4ff 0%,#fff8ff 50%,#f0fff8 100%)', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: '-60px', right: '10%', width: '320px', height: '320px', borderRadius: '50%', background: 'radial-gradient(circle,rgba(108,99,255,0.1),transparent 70%)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: '1280px', margin: '0 auto', position: 'relative' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(0,200,150,0.1)', border: '1px solid rgba(0,200,150,0.25)', borderRadius: '20px', padding: '6px 16px', marginBottom: '24px', fontSize: '11px', fontWeight: 700, color: '#059669', letterSpacing: '0.08em' }}>
@@ -91,7 +63,7 @@ export default function AboutPage() {
       </section>
 
       {/* Stats */}
-      <section style={{ padding: '64px 48px' }}>
+      <section className="pub-pad" style={{ paddingTop: '64px', paddingBottom: '64px' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '16px' }}>
           {stats.map(({ value, label, color }) => (
             <div key={label} style={{ background: '#f8f9fc', border: '1.5px solid rgba(0,0,0,0.06)', borderRadius: '16px', padding: '28px 20px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
@@ -104,7 +76,7 @@ export default function AboutPage() {
       </section>
 
       {/* What sets us apart */}
-      <section style={{ padding: '0 48px 64px' }}>
+      <section className="pub-pad" style={{ paddingBottom: '64px' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
           <div style={{ background: 'linear-gradient(135deg,#f0f4ff,#f0fff8)', border: '1.5px solid rgba(0,200,150,0.15)', borderRadius: '20px', padding: '48px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '24px' }}>
@@ -127,7 +99,7 @@ export default function AboutPage() {
       </section>
 
       {/* Capabilities */}
-      <section style={{ padding: '0 48px 64px', background: '#f8f9fc' }}>
+      <section className="pub-pad" style={{ paddingBottom: '64px', background: '#f8f9fc' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', paddingTop: '64px', paddingBottom: '64px' }}>
           <div style={{ textAlign: 'center', marginBottom: '40px' }}>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(22px,3vw,34px)', fontWeight: 800, color: '#0f0f1a', marginBottom: '10px' }}>Platform Capabilities</h2>
@@ -147,7 +119,7 @@ export default function AboutPage() {
       </section>
 
       {/* Core principles */}
-      <section style={{ padding: '64px 48px' }}>
+      <section className="pub-pad" style={{ paddingTop: '64px', paddingBottom: '64px' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
           <div style={{ textAlign: 'center', marginBottom: '40px' }}>
             <h2 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(22px,3vw,34px)', fontWeight: 800, color: '#0f0f1a', marginBottom: '10px' }}>Our Core Principles</h2>
@@ -169,7 +141,7 @@ export default function AboutPage() {
       </section>
 
       {/* Who we serve */}
-      <section style={{ padding: '0 48px 64px' }}>
+      <section className="pub-pad" style={{ paddingBottom: '64px' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
           <div style={{ background: '#f8f9fc', border: '1.5px solid rgba(0,0,0,0.06)', borderRadius: '20px', padding: '48px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(280px,1fr))', gap: '40px' }}>
             <div>

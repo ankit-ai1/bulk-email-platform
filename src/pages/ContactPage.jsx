@@ -1,6 +1,7 @@
-import { Link, useLocation } from 'react-router-dom'
+import { Link } from 'react-router-dom'
+import SiteNavbar from '../components/shared/SiteNavbar'
 import SiteFooter from '../components/shared/SiteFooter'
-import { Zap, Mail, HeadphonesIcon, Shield, Scale, ArrowRight, Clock, MessageSquare } from 'lucide-react'
+import { Mail, HeadphonesIcon, Shield, Scale, ArrowRight, Clock, MessageSquare } from 'lucide-react'
 
 const contacts = [
   { icon: Mail, title: 'General Enquiries', description: 'Questions about our platform, pricing, or features? We\'ll point you in the right direction.', email: 'hello@mailrax.app', color: '#00c896' },
@@ -16,42 +17,13 @@ const responseTimes = [
   { type: 'Legal & privacy', time: 'Within 5 business days' },
 ]
 
-function Navbar() {
-  const { pathname } = useLocation()
-  return (
-    <nav style={{
-      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-      padding: '0 48px', height: '64px',
-      borderBottom: '1px solid rgba(0,0,0,0.07)',
-      background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(16px)',
-      position: 'sticky', top: 0, zIndex: 100,
-    }}>
-      <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-        <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'linear-gradient(135deg,#00c896,#6c63ff)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(108,99,255,0.25)' }}>
-          <Zap size={15} color="#fff" fill="#fff" />
-        </div>
-        <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '18px', color: '#0f0f1a' }}>MailRax</span>
-      </Link>
-      <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-        {[['Home','/'],['About','/about'],['Pricing','/pricing'],['Contact','/contact']].map(([l,t]) => {
-          const active = pathname === t
-          return (
-          <Link key={t} to={t} style={{ color: active ? '#0f0f1a' : '#888', textDecoration: 'none', fontSize: '14px', fontWeight: active ? 600 : 400, padding: '7px 14px', borderRadius: '8px', background: active ? 'rgba(0,0,0,0.05)' : 'transparent', transition: 'color 0.15s' }}>{l}</Link>
-          )
-        })}
-        <Link to="/login" style={{ color: '#fff', textDecoration: 'none', fontSize: '14px', fontWeight: 700, padding: '9px 22px', borderRadius: '9px', background: 'linear-gradient(135deg,#00c896,#6c63ff)', marginLeft: '8px', boxShadow: '0 4px 12px rgba(108,99,255,0.25)' }}>Sign In</Link>
-      </div>
-    </nav>
-  )
-}
-
 export default function ContactPage() {
   return (
     <div style={{ minHeight: '100vh', background: '#fff', color: '#0f0f1a', fontFamily: 'var(--font-body)' }}>
-      <Navbar />
+      <SiteNavbar />
 
       {/* Hero */}
-      <section style={{ padding: '80px 48px 64px', background: 'linear-gradient(160deg,#f3f0ff 0%,#fff 60%)', position: 'relative', overflow: 'hidden' }}>
+      <section className="pub-pad" style={{ paddingTop: '80px', paddingBottom: '64px', background: 'linear-gradient(160deg,#f3f0ff 0%,#fff 60%)', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: '-60px', right: '8%', width: '300px', height: '300px', borderRadius: '50%', background: 'radial-gradient(circle,rgba(108,99,255,0.08),transparent 70%)', pointerEvents: 'none' }} />
         <div style={{ maxWidth: '1280px', margin: '0 auto', position: 'relative' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(108,99,255,0.08)', border: '1px solid rgba(108,99,255,0.2)', borderRadius: '20px', padding: '6px 16px', marginBottom: '24px', fontSize: '11px', fontWeight: 700, color: '#6c63ff', letterSpacing: '0.08em' }}>
@@ -70,7 +42,7 @@ export default function ContactPage() {
       </section>
 
       {/* Contact cards */}
-      <section style={{ padding: '0 48px 64px' }}>
+      <section className="pub-pad" style={{ paddingBottom: '64px' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: '16px' }}>
           {contacts.map(({ icon: Icon, title, description, email, color }) => (
             <div key={email} style={{ background: '#fff', border: '1.5px solid rgba(0,0,0,0.07)', borderRadius: '16px', padding: '28px', boxShadow: '0 4px 16px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '14px', position: 'relative', overflow: 'hidden' }}>
@@ -91,7 +63,7 @@ export default function ContactPage() {
       </section>
 
       {/* Response times */}
-      <section style={{ padding: '0 48px 64px' }}>
+      <section className="pub-pad" style={{ paddingBottom: '64px' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
           <div style={{ background: '#f8f9fc', border: '1.5px solid rgba(0,0,0,0.06)', borderRadius: '20px', padding: '40px 48px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: '40px' }}>
             <div>
@@ -116,7 +88,7 @@ export default function ContactPage() {
       </section>
 
       {/* CTA */}
-      <section style={{ padding: '0 48px 80px' }}>
+      <section className="pub-pad" style={{ paddingBottom: '80px' }}>
         <div style={{ maxWidth: '1280px', margin: '0 auto', background: 'linear-gradient(135deg,#f0f4ff,#f0fff8)', border: '1.5px solid rgba(0,200,150,0.15)', borderRadius: '16px', padding: '40px 48px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '24px', flexWrap: 'wrap' }}>
           <div>
             <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 800, color: '#0f0f1a', marginBottom: '8px' }}>Ready to get started?</h3>

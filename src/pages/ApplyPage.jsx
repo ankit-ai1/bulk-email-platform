@@ -137,9 +137,9 @@ export default function ApplyPage() {
     return (
       <div style={{ minHeight: '100vh', background: '#fff', display: 'flex', flexDirection: 'column', fontFamily: 'var(--font-body)' }}>
         {/* Navbar */}
-        <nav style={{
+        <nav className="pub-nav" style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '0 48px', height: '64px',
+          height: '64px',
           borderBottom: '1px solid rgba(0,0,0,0.07)',
           background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(16px)',
           position: 'sticky', top: 0, zIndex: 100,
@@ -203,9 +203,9 @@ export default function ApplyPage() {
     <div style={{ minHeight: '100vh', background: '#fff', fontFamily: 'var(--font-body)', color: '#0f0f1a', display: 'flex', flexDirection: 'column' }}>
 
       {/* Navbar */}
-      <nav style={{
+      <nav className="pub-nav" style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 48px', height: '64px',
+        height: '64px',
         borderBottom: '1px solid rgba(0,0,0,0.07)',
         background: 'rgba(255,255,255,0.95)', backdropFilter: 'blur(16px)',
         position: 'sticky', top: 0, zIndex: 100,
@@ -222,7 +222,7 @@ export default function ApplyPage() {
       </nav>
 
       {/* Hero strip */}
-      <div style={{ background: 'linear-gradient(160deg,#f0f4ff 0%,#fff 60%)', padding: '36px 48px 0', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
+      <div className="pub-pad" style={{ background: 'linear-gradient(160deg,#f0f4ff 0%,#fff 60%)', paddingTop: '36px', borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
         <div style={{ maxWidth: '580px', margin: '0 auto', paddingBottom: '32px' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(108,99,255,0.08)', border: '1px solid rgba(108,99,255,0.2)', borderRadius: '20px', padding: '5px 14px', marginBottom: '16px', fontSize: '11px', fontWeight: 700, color: '#6c63ff', letterSpacing: '0.08em' }}>
             APPLICATION FORM
