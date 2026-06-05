@@ -22,7 +22,7 @@ export default function PublicLayout({ children }) {
   const { pathname } = useLocation()
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#fff', color: '#0f0f1a', fontFamily: 'var(--font-body)' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#fff', color: '#0f0f1a', fontFamily: 'var(--font-body)', '--text-primary': '#0f0f1a', '--text-secondary': '#555', '--text-muted': '#888' }}>
 
       {/* Header */}
       <header style={{

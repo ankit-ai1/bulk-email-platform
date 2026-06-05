@@ -1,30 +1,17 @@
-import PublicLayout from '../components/shared/PublicLayout'
-
-function Section({ title, children }) {
-  return (
-    <section style={{ marginBottom: '36px' }}>
-      <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '12px', color: 'var(--text-primary)' }}>{title}</h2>
-      <div style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: '1.8', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {children}
-      </div>
-    </section>
-  )
-}
+import LegalLayout, { Section } from '../components/shared/LegalLayout'
 
 export default function PrivacyPolicyPage() {
   return (
-    <PublicLayout>
-      <div style={{ marginBottom: '40px' }}>
-        <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}>Last updated: June 1, 2026</p>
-        <h1 style={{ fontSize: '32px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '12px' }}>Privacy Policy</h1>
-        <p style={{ fontSize: '15px', color: 'var(--text-secondary)' }}>
-          This Privacy Policy explains how MailRax collects, uses, and protects your personal information when you use our bulk email platform.
-        </p>
-      </div>
-
+    <LegalLayout
+      badge="LEGAL · PRIVACY"
+      title="Privacy Policy"
+      subtitle="This Privacy Policy explains how MailRax collects, uses, and protects your personal information when you use our bulk email platform."
+      accentColor="#6c63ff"
+      date="June 1, 2026"
+    >
       <Section title="1. Information We Collect">
         <p>We collect information you provide directly to us when you create an account, configure campaigns, or contact us for support:</p>
-        <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <li><strong>Account information:</strong> Name, email address, and password.</li>
           <li><strong>Campaign data:</strong> Email lists, templates, and sending history.</li>
           <li><strong>Usage data:</strong> Log data, IP addresses, browser type, and pages visited.</li>
@@ -34,7 +21,7 @@ export default function PrivacyPolicyPage() {
 
       <Section title="2. How We Use Your Information">
         <p>We use the information we collect to:</p>
-        <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <li>Provide, maintain, and improve our services.</li>
           <li>Send transactional emails such as account verification and password resets.</li>
           <li>Monitor and enforce compliance with our policies.</li>
@@ -45,7 +32,7 @@ export default function PrivacyPolicyPage() {
 
       <Section title="3. Data Sharing">
         <p>We do not sell your personal data. We may share your information with:</p>
-        <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <li><strong>Service providers:</strong> Third-party vendors who assist in operating our platform (e.g., email delivery, database hosting).</li>
           <li><strong>Legal requirements:</strong> When required by law, court order, or governmental authority.</li>
           <li><strong>Business transfers:</strong> In connection with a merger, acquisition, or sale of assets.</li>
@@ -69,8 +56,8 @@ export default function PrivacyPolicyPage() {
       </Section>
 
       <Section title="8. Contact">
-        <p>For privacy-related questions or requests, contact us at: <a href="mailto:privacy@mailrax.app" style={{ color: 'var(--accent)' }}>privacy@mailrax.app</a></p>
+        <p>For privacy-related questions or requests, contact us at: <a href="mailto:privacy@mailrax.app" style={{ color: '#6c63ff', textDecoration: 'none', fontWeight: 600 }}>privacy@mailrax.app</a></p>
       </Section>
-    </PublicLayout>
+    </LegalLayout>
   )
 }

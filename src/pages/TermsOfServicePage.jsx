@@ -1,27 +1,14 @@
-import PublicLayout from '../components/shared/PublicLayout'
-
-function Section({ title, children }) {
-  return (
-    <section style={{ marginBottom: '36px' }}>
-      <h2 style={{ fontSize: '18px', fontWeight: 700, marginBottom: '12px', color: 'var(--text-primary)' }}>{title}</h2>
-      <div style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: '1.8', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {children}
-      </div>
-    </section>
-  )
-}
+import LegalLayout, { Section } from '../components/shared/LegalLayout'
 
 export default function TermsOfServicePage() {
   return (
-    <PublicLayout>
-      <div style={{ marginBottom: '40px' }}>
-        <p style={{ fontSize: '13px', color: 'var(--text-muted)', marginBottom: '8px' }}>Last updated: June 1, 2026</p>
-        <h1 style={{ fontSize: '32px', fontWeight: 800, color: 'var(--text-primary)', marginBottom: '12px' }}>Terms of Service</h1>
-        <p style={{ fontSize: '15px', color: 'var(--text-secondary)' }}>
-          By accessing or using MailRax, you agree to be bound by these Terms of Service. Please read them carefully.
-        </p>
-      </div>
-
+    <LegalLayout
+      badge="LEGAL · TERMS"
+      title="Terms of Service"
+      subtitle="By accessing or using MailRax, you agree to be bound by these Terms of Service. Please read them carefully."
+      accentColor="#00c896"
+      date="June 1, 2026"
+    >
       <Section title="1. Acceptance of Terms">
         <p>By creating an account or using MailRax in any way, you agree to these Terms of Service and our Privacy Policy. If you do not agree, do not use the platform.</p>
       </Section>
@@ -31,7 +18,7 @@ export default function TermsOfServicePage() {
       </Section>
 
       <Section title="3. Your Account">
-        <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <li>You are responsible for maintaining the confidentiality of your account credentials.</li>
           <li>You are responsible for all activities that occur under your account.</li>
           <li>You must notify us immediately of any unauthorized use of your account.</li>
@@ -41,7 +28,7 @@ export default function TermsOfServicePage() {
 
       <Section title="4. Acceptable Use">
         <p>You agree to use MailRax only for lawful purposes. You must not:</p>
-        <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <li>Send unsolicited bulk email (spam) to recipients who have not opted in.</li>
           <li>Use the platform to distribute malware, phishing content, or illegal material.</li>
           <li>Impersonate any person or entity or misrepresent your affiliation.</li>
@@ -71,8 +58,8 @@ export default function TermsOfServicePage() {
       </Section>
 
       <Section title="10. Contact">
-        <p>Questions about these Terms? Contact us at: <a href="mailto:legal@mailrax.app" style={{ color: 'var(--accent)' }}>legal@mailrax.app</a></p>
+        <p>Questions about these Terms? Contact us at: <a href="mailto:legal@mailrax.app" style={{ color: '#00c896', textDecoration: 'none', fontWeight: 600 }}>legal@mailrax.app</a></p>
       </Section>
-    </PublicLayout>
+    </LegalLayout>
   )
 }
