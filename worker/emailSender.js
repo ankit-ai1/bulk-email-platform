@@ -17,25 +17,36 @@ export async function sendEmail({ to, toName, subject, body, isHtml, fromEmail, 
     ? body + UNSUBSCRIBE_FOOTER_HTML
     : `<p>${body.replace(/\n/g, '<br>')}</p>` + UNSUBSCRIBE_FOOTER_HTML;
 
+  const payload = {
+    contacts: [{ email: to, name: toName || '' }],
+    subject,
+    htmlBody,
+    fromEmail: fromEmail || process.env.FROM_EMAIL,
+  };
+
+  console.log(`[emailSender] Calling edge function: ${EDGE_FUNCTION_URL}`);
+  console.log(`[emailSender] Payload:`, JSON.stringify(payload));
+
   const res = await fetch(EDGE_FUNCTION_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+      'apikey': process.env.SUPABASE_ANON_KEY,
     },
-    body: JSON.stringify({
-      contacts: [{ email: to, name: toName || '' }],
-      subject,
-      htmlBody,
-      fromEmail: fromEmail || process.env.FROM_EMAIL,
-    }),
+    body: JSON.stringify(payload),
   });
 
+  const rawText = await res.text();
+  console.log(`[emailSender] Edge function response ${res.status}:`, rawText);
+
   if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(err.error || err.message || `Edge function returned ${res.status}`);
+    let errMsg;
+    try { errMsg = JSON.parse(rawText)?.error || JSON.parse(rawText)?.message; } catch {}
+    throw new Error(errMsg || rawText || `Edge function returned ${res.status}`);
   }
 
-  const data = await res.json().catch(() => ({}));
+  let data = {};
+  try { data = JSON.parse(rawText); } catch {}
   return data.messageId || null;
 }

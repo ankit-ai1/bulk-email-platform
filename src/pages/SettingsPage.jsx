@@ -4,12 +4,7 @@ import { useAuth } from '../hooks/useAuth'
 import toast from 'react-hot-toast'
 import { Settings, Mail, User, Shield, Save, CheckCircle, Eye, EyeOff, Lock, RefreshCw, Plus, Trash2, Clock, AtSign } from 'lucide-react'
 
-const WORKER_URL = '/api'
-
-// Debug: log the URL being used
-if (typeof window !== 'undefined') {
-  console.log('SettingsPage - WORKER_URL:', WORKER_URL)
-}
+const WORKER_URL = import.meta.env.VITE_WORKER_URL || '/api'
 
 export default function SettingsPage() {
   const { user } = useAuth()
@@ -72,7 +67,6 @@ export default function SettingsPage() {
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error || 'Failed to send OTP')
-      toast.success(`Verification code sent to ${emailAdded}`)
       setSenderForm({ name: '', email: '' })
       // Reload and auto-show OTP input for the new email
       const { data: updated } = await supabase
@@ -83,6 +77,7 @@ export default function SettingsPage() {
       setSenderEmails(updated || [])
       const fresh = (updated || []).find(s => s.email === emailAdded)
       if (fresh) setOtpVisible(v => ({ ...v, [fresh.id]: true }))
+      toast.success(`Verification code sent to ${emailAdded}`)
     } catch (err) {
       toast.error(err.message)
     } finally {

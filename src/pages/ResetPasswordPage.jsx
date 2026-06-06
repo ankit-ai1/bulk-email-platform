@@ -2,7 +2,9 @@ import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
-import { Zap, Eye, EyeOff, Lock, CheckCircle } from 'lucide-react'
+import { Eye, EyeOff, Lock, CheckCircle } from 'lucide-react'
+
+const LOGO = 'https://res.cloudinary.com/dtg3lepr4/image/upload/v1780738217/WhatsApp_Image_2026-06-06_at_2.50.11_PM_1_nrubcm.jpg'
 import SiteFooter from '../components/shared/SiteFooter'
 
 export default function ResetPasswordPage() {
@@ -45,13 +47,9 @@ export default function ResetPasswordPage() {
 
       <div style={{ width: '100%', maxWidth: '400px', animation: 'slideUp 0.3s ease' }}>
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-          <div style={{
-            width: '56px', height: '56px', borderRadius: '16px',
-            background: 'linear-gradient(135deg, #6c63ff 0%, #a78bfa 100%)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto 16px', boxShadow: '0 0 40px rgba(108,99,255,0.4)',
-          }}>
-            <Zap size={28} color="white" />
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
+            <img src={LOGO} alt="" style={{ height: '44px', width: 'auto', objectFit: 'contain' }} />
+            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '26px', color: 'var(--text-primary)' }}>MailRax</span>
           </div>
           <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '26px', color: 'var(--text-primary)', marginBottom: '6px' }}>
             Set New Password

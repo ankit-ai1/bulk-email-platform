@@ -2,7 +2,25 @@ import http from 'http';
 import { sendEmail } from './emailSender.js';
 import { supabase } from './logger.js';
 
+const EDGE_FUNCTION_URL = `${process.env.SUPABASE_URL}/functions/v1/send-bulk-email`;
+
+async function triggerSESIdentityVerification(email) {
+  try {
+    await fetch(EDGE_FUNCTION_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'verify-identity', email }),
+    });
+  } catch (err) {
+    console.warn('[SES] Identity verification trigger failed:', err.message);
+  }
+}
+
 const PORT = parseInt(process.env.PORT || process.env.WORKER_PORT) || 3001;
+
+function isUUID(value) {
+  return typeof value === 'string' && /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-5][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}$/.test(value);
+}
 
 // Helper to send response with guaranteed CORS headers
 function sendWithCORS(res, statusCode, body) {
@@ -64,6 +82,10 @@ export function startHttpServer() {
               sendWithCORS(res, 400, { error: 'Missing email or userId' });
               return;
             }
+            if (!isUUID(userId)) {
+              sendWithCORS(res, 400, { error: 'Invalid userId format' });
+              return;
+            }
 
             const { data: existing } = await supabase
               .from('sender_emails')
@@ -104,25 +126,39 @@ export function startHttpServer() {
 
             if (dbError) throw new Error(dbError.message);
 
-            await sendEmail({
-              to: email,
-              subject: 'Verify your sender email — MailRax',
-              body: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px;">
-                <h2 style="color:#6c63ff;margin-bottom:16px;">Verify Your Email</h2>
-                <p style="color:#333;">Use the code below to verify <strong>${email}</strong> as a sender in MailRax.</p>
-                <div style="background:#f4f3ff;border:2px solid #6c63ff;border-radius:12px;padding:24px;text-align:center;margin:24px 0;">
-                  <span style="font-size:36px;font-weight:800;letter-spacing:12px;color:#6c63ff;">${otp}</span>
-                </div>
-                <p style="color:#888;font-size:13px;">Expires in 15 minutes. If you didn't request this, ignore this email.</p>
-              </div>`,
-              isHtml: true,
-              fromEmail: process.env.FROM_EMAIL,
-              fromName: process.env.FROM_NAME || 'MailRax',
-            });
+            // Trigger SES identity verification (fire-and-forget).
+            // AWS sends a verification link — works even in sandbox mode.
+            triggerSESIdentityVerification(email);
 
-            sendWithCORS(res, 200, { success: true });
+            try {
+              await sendEmail({
+                to: email,
+                subject: 'Verify your sender email — MailRax',
+                body: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px;">
+                  <h2 style="color:#6c63ff;margin-bottom:16px;">Verify Your Email</h2>
+                  <p style="color:#333;">Use the code below to verify <strong>${email}</strong> as a sender in MailRax.</p>
+                  <div style="background:#f4f3ff;border:2px solid #6c63ff;border-radius:12px;padding:24px;text-align:center;margin:24px 0;">
+                    <span style="font-size:36px;font-weight:800;letter-spacing:12px;color:#6c63ff;">${otp}</span>
+                  </div>
+                  <p style="color:#888;font-size:13px;">Expires in 15 minutes. If you didn't request this, ignore this email.</p>
+                </div>`,
+                isHtml: true,
+                fromEmail: process.env.FROM_EMAIL,
+                fromName: process.env.FROM_NAME || 'MailRax',
+              });
+              sendWithCORS(res, 200, { success: true });
+            } catch (emailErr) {
+              const msg = emailErr.message || '';
+              if (msg.includes('not verified') || msg.includes('identities failed')) {
+                // SES sandbox: recipient not yet verified. AWS verification link already sent.
+                sendWithCORS(res, 200, { awsVerificationPending: true });
+              } else {
+                throw emailErr;
+              }
+            }
           } catch (err) {
-            const detail = err.response?.body?.errors?.[0]?.message || err.message;
+            const detail = err.message || 'Unknown error';
+            console.error('[HTTP /send-verification-otp] Error:', detail);
             sendWithCORS(res, 500, { error: detail });
           }
         });
@@ -146,6 +182,10 @@ export function startHttpServer() {
             const { email, userId, otp } = JSON.parse(body);
             if (!email || !userId || !otp) {
               sendWithCORS(res, 400, { error: 'Missing required fields' });
+              return;
+            }
+            if (!isUUID(userId)) {
+              sendWithCORS(res, 400, { error: 'Invalid userId format' });
               return;
             }
 
@@ -223,7 +263,8 @@ export function startHttpServer() {
             });
             sendWithCORS(res, 200, { success: true });
           } catch (err) {
-            const detail = err.response?.body?.errors?.[0]?.message || err.message;
+            const detail = err.message || 'Unknown error';
+            console.error('[HTTP /test-email] Error:', detail);
             sendWithCORS(res, 500, { error: detail });
           }
         });

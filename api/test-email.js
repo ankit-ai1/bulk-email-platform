@@ -1,9 +1,23 @@
-const EDGE_FUNCTION_URL = `${process.env.SUPABASE_URL}/functions/v1/send-bulk-email`;
+function getSupabaseConfig() {
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+  const fromEmail = process.env.FROM_EMAIL;
+
+  if (!supabaseUrl || !supabaseAnonKey || !fromEmail) {
+    throw new Error(
+      'Missing required server environment variables. Ensure SUPABASE_URL, SUPABASE_ANON_KEY, and FROM_EMAIL are set.'
+    );
+  }
+
+  return { supabaseUrl, supabaseAnonKey, fromEmail };
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
+    const { supabaseUrl, supabaseAnonKey, fromEmail } = getSupabaseConfig();
+    const EDGE_FUNCTION_URL = `${supabaseUrl}/functions/v1/send-bulk-email`;
     const { to } = req.body || {};
     if (!to) return res.status(400).json({ error: 'Missing recipient email' });
 
@@ -11,7 +25,7 @@ export default async function handler(req, res) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+        'Authorization': `Bearer ${supabaseAnonKey}`,
       },
       body: JSON.stringify({
         contacts: [{ email: to, name: '' }],
@@ -21,7 +35,7 @@ export default async function handler(req, res) {
           <p>Your AWS SES configuration is working correctly!</p>
           <p style="color:#888;font-size:13px;">Sent from <strong>MailRax</strong>.</p>
         </div>`,
-        fromEmail: process.env.FROM_EMAIL,
+        fromEmail,
       }),
     });
 

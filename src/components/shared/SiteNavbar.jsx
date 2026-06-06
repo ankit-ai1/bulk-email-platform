@@ -1,6 +1,8 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Zap, Menu, X } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
+
+const LOGO = 'https://res.cloudinary.com/dtg3lepr4/image/upload/v1780738217/WhatsApp_Image_2026-06-06_at_2.50.11_PM_1_nrubcm.jpg'
 
 const navLinks = [
   ['Home', '/'],
@@ -23,10 +25,8 @@ export default function SiteNavbar() {
       }} className="pub-nav">
 
         {/* Logo */}
-        <Link to="/" onClick={() => setOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none', flexShrink: 0 }}>
-          <div style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'linear-gradient(135deg,#00c896,#6c63ff)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 12px rgba(108,99,255,0.25)' }}>
-            <Zap size={15} color="#fff" fill="#fff" />
-          </div>
+        <Link to="/" onClick={() => setOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', flexShrink: 0 }}>
+          <img src={LOGO} alt="" style={{ height: '38px', width: 'auto', objectFit: 'contain' }} />
           <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '18px', color: '#0f0f1a' }}>MailRax</span>
         </Link>
 

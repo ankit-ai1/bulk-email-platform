@@ -1,3 +1,6 @@
+@tailwind components;
+@tailwind utilities;
+
 :root {
   --bg-primary: #0a0a0f;
   --bg-secondary: #111118;
@@ -45,9 +48,14 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  font-optical-sizing: none;
 }
 
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
 body {
   font-family: var(--font-body);
@@ -56,6 +64,7 @@ body {
   line-height: 1.6;
   min-height: 100vh;
   overflow-x: hidden;
+  font-variation-settings: 'opsz' 14;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -326,6 +335,31 @@ tbody tr:hover { background: var(--bg-elevated); }
 @keyframes shimmer {
   0% { background-position: -200% 0; }
   100% { background-position: 200% 0; }
+}
+
+@keyframes floatY {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50%       { transform: translateY(-22px) rotate(4deg); }
+}
+@keyframes floatY2 {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50%       { transform: translateY(-16px) rotate(-6deg); }
+}
+@keyframes floatY3 {
+  0%, 100% { transform: translateY(0px) scale(1); }
+  50%       { transform: translateY(-28px) scale(1.05); }
+}
+@keyframes orb-pulse {
+  0%, 100% { transform: scale(1);   opacity: 0.5; }
+  50%       { transform: scale(1.15); opacity: 0.8; }
+}
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes dash-move {
+  0%   { stroke-dashoffset: 200; }
+  100% { stroke-dashoffset: 0; }
 }
 
 /* Loading */
@@ -613,4 +647,9 @@ tbody tr:hover { background: var(--bg-elevated); }
   .pub-stats-row  { grid-template-columns: 1fr 1fr !important; }
   .pub-footer-grid { grid-template-columns: 1fr !important; }
   .pub-plan-grid  { grid-template-columns: 1fr !important; }
+}
+
+/* Login page */
+@media (max-width: 860px) {
+  .login-left-panel { display: none !important; }
 }

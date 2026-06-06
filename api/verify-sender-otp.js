@@ -1,12 +1,24 @@
 import { createClient } from '@supabase/supabase-js';
 
+function getSupabaseConfig() {
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || process.env.VITE_SUPABASE_SERVICE_KEY;
+
+  if (!supabaseUrl || !supabaseServiceKey) {
+    throw new Error('Missing required server environment variables. Ensure SUPABASE_URL and SUPABASE_SERVICE_KEY are set.');
+  }
+
+  return { supabaseUrl, supabaseServiceKey };
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
+    const { supabaseUrl, supabaseServiceKey } = getSupabaseConfig();
     const supabase = createClient(
-      process.env.VITE_SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_KEY,
+      supabaseUrl,
+      supabaseServiceKey,
       { auth: { persistSession: false } }
     );
 

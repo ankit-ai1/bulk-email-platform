@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom'
-import { Zap, CheckCircle } from 'lucide-react'
+import { CheckCircle } from 'lucide-react'
+
+const LOGO = 'https://res.cloudinary.com/dtg3lepr4/image/upload/v1780738217/WhatsApp_Image_2026-06-06_at_2.50.11_PM_1_nrubcm.jpg'
 
 export default function SiteFooter() {
   return (
@@ -11,12 +13,10 @@ export default function SiteFooter() {
 
           {/* Brand */}
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '9px', marginBottom: '14px' }}>
-              <div style={{ width: '30px', height: '30px', borderRadius: '7px', background: 'linear-gradient(135deg,#00c896,#6c63ff)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Zap size={13} color="#fff" fill="#fff" />
-              </div>
+            <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '9px', marginBottom: '14px', textDecoration: 'none' }}>
+              <img src={LOGO} alt="" style={{ height: '34px', width: 'auto', objectFit: 'contain' }} />
               <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '17px', color: '#fff' }}>MailRax</span>
-            </div>
+            </Link>
             <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', lineHeight: '1.75', maxWidth: '200px' }}>
               SaaS email delivery for compliant businesses.
             </p>

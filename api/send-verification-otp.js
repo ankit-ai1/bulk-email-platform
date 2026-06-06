@@ -1,14 +1,29 @@
 import { createClient } from '@supabase/supabase-js';
 
-const EDGE_FUNCTION_URL = `${process.env.SUPABASE_URL}/functions/v1/send-bulk-email`;
+function getSupabaseConfig() {
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL;
+  const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY || process.env.VITE_SUPABASE_SERVICE_KEY;
+  const supabaseAnonKey = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY;
+  const fromEmail = process.env.FROM_EMAIL;
+
+  if (!supabaseUrl || !supabaseServiceKey || !supabaseAnonKey || !fromEmail) {
+    throw new Error(
+      'Missing required server environment variables. Ensure SUPABASE_URL, SUPABASE_SERVICE_KEY, SUPABASE_ANON_KEY, and FROM_EMAIL are set.'
+    );
+  }
+
+  return { supabaseUrl, supabaseServiceKey, supabaseAnonKey, fromEmail };
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
+    const { supabaseUrl, supabaseServiceKey, supabaseAnonKey, fromEmail } = getSupabaseConfig();
+    const EDGE_FUNCTION_URL = `${supabaseUrl}/functions/v1/send-bulk-email`;
     const supabase = createClient(
-      process.env.VITE_SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_KEY,
+      supabaseUrl,
+      supabaseServiceKey,
       { auth: { persistSession: false } }
     );
 
@@ -52,7 +67,7 @@ export default async function handler(req, res) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+        'Authorization': `Bearer ${supabaseAnonKey}`,
       },
       body: JSON.stringify({
         contacts: [{ email, name: name || '' }],
@@ -65,7 +80,7 @@ export default async function handler(req, res) {
           </div>
           <p style="color:#888;font-size:13px;">Expires in 15 minutes. If you didn't request this, ignore this email.</p>
         </div>`,
-        fromEmail: process.env.FROM_EMAIL,
+        fromEmail,
       }),
     });
 
