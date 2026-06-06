@@ -1,27 +1,37 @@
-import sgMail from '@sendgrid/mail';
+const EDGE_FUNCTION_URL = `${process.env.SUPABASE_URL}/functions/v1/send-bulk-email`;
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
     const { to } = req.body || {};
     if (!to) return res.status(400).json({ error: 'Missing recipient email' });
 
-    await sgMail.send({
-      to,
-      from: { email: process.env.FROM_EMAIL, name: process.env.FROM_NAME || 'MailRax' },
-      subject: 'Test Email — MailRax',
-      html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px;">
-        <h2 style="color:#6c63ff;">Test Email</h2>
-        <p>Your SendGrid configuration is working correctly!</p>
-        <p style="color:#888;font-size:13px;">Sent from <strong>MailRax</strong>.</p>
-      </div>`,
+    const edgeRes = await fetch(EDGE_FUNCTION_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+      },
+      body: JSON.stringify({
+        contacts: [{ email: to, name: '' }],
+        subject: 'Test Email — MailRax',
+        htmlBody: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px;">
+          <h2 style="color:#6c63ff;">Test Email</h2>
+          <p>Your AWS SES configuration is working correctly!</p>
+          <p style="color:#888;font-size:13px;">Sent from <strong>MailRax</strong>.</p>
+        </div>`,
+        fromEmail: process.env.FROM_EMAIL,
+      }),
     });
+
+    if (!edgeRes.ok) {
+      const err = await edgeRes.json().catch(() => ({}));
+      throw new Error(err.error || err.message || `Edge function returned ${edgeRes.status}`);
+    }
+
     return res.status(200).json({ success: true });
   } catch (err) {
-    const detail = err.response?.body?.errors?.[0]?.message || err.message;
-    return res.status(500).json({ error: detail });
+    return res.status(500).json({ error: err.message });
   }
 }

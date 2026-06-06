@@ -1,12 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
-import sgMail from '@sendgrid/mail';
+
+const EDGE_FUNCTION_URL = `${process.env.SUPABASE_URL}/functions/v1/send-bulk-email`;
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-
     const supabase = createClient(
       process.env.VITE_SUPABASE_URL,
       process.env.SUPABASE_SERVICE_KEY,
@@ -49,23 +48,34 @@ export default async function handler(req, res) {
 
     if (dbError) throw new Error(dbError.message);
 
-    await sgMail.send({
-      to: email,
-      from: { email: process.env.FROM_EMAIL, name: process.env.FROM_NAME || 'MailRax' },
-      subject: 'Verify your sender email — MailRax',
-      html: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px;">
-        <h2 style="color:#6c63ff;margin-bottom:16px;">Verify Your Email</h2>
-        <p style="color:#333;">Use the code below to verify <strong>${email}</strong> as a sender in MailRax.</p>
-        <div style="background:#f4f3ff;border:2px solid #6c63ff;border-radius:12px;padding:24px;text-align:center;margin:24px 0;">
-          <span style="font-size:36px;font-weight:800;letter-spacing:12px;color:#6c63ff;">${otp}</span>
-        </div>
-        <p style="color:#888;font-size:13px;">Expires in 15 minutes. If you didn't request this, ignore this email.</p>
-      </div>`,
+    const edgeRes = await fetch(EDGE_FUNCTION_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
+      },
+      body: JSON.stringify({
+        contacts: [{ email, name: name || '' }],
+        subject: 'Verify your sender email — MailRax',
+        htmlBody: `<div style="font-family:sans-serif;max-width:480px;margin:0 auto;padding:32px;">
+          <h2 style="color:#6c63ff;margin-bottom:16px;">Verify Your Email</h2>
+          <p style="color:#333;">Use the code below to verify <strong>${email}</strong> as a sender in MailRax.</p>
+          <div style="background:#f4f3ff;border:2px solid #6c63ff;border-radius:12px;padding:24px;text-align:center;margin:24px 0;">
+            <span style="font-size:36px;font-weight:800;letter-spacing:12px;color:#6c63ff;">${otp}</span>
+          </div>
+          <p style="color:#888;font-size:13px;">Expires in 15 minutes. If you didn't request this, ignore this email.</p>
+        </div>`,
+        fromEmail: process.env.FROM_EMAIL,
+      }),
     });
+
+    if (!edgeRes.ok) {
+      const err = await edgeRes.json().catch(() => ({}));
+      throw new Error(err.error || err.message || `Edge function returned ${edgeRes.status}`);
+    }
 
     return res.status(200).json({ success: true });
   } catch (err) {
-    const detail = err.response?.body?.errors?.[0]?.message || err.message;
-    return res.status(500).json({ error: detail });
+    return res.status(500).json({ error: err.message });
   }
 }

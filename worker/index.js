@@ -23,7 +23,7 @@ async function poll() {
 }
 
 function validateEnv() {
-  const required = ['SUPABASE_URL', 'SUPABASE_SERVICE_KEY', 'SENDGRID_API_KEY', 'FROM_EMAIL'];
+  const required = ['SUPABASE_URL', 'SUPABASE_SERVICE_KEY', 'SUPABASE_ANON_KEY', 'FROM_EMAIL'];
   const missing = required.filter((key) => !process.env[key]);
   if (missing.length > 0) {
     console.error('[Worker] Missing required environment variables:', missing.join(', '));

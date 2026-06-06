@@ -1,6 +1,4 @@
-import sgMail from '@sendgrid/mail';
-
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+const EDGE_FUNCTION_URL = `${process.env.SUPABASE_URL}/functions/v1/send-bulk-email`;
 
 const UNSUBSCRIBE_FOOTER_HTML = `
 <br>
@@ -10,47 +8,34 @@ const UNSUBSCRIBE_FOOTER_HTML = `
   If you no longer wish to receive these emails, please reply with "Unsubscribe" in the subject line.
 </p>`;
 
-const UNSUBSCRIBE_FOOTER_TEXT =
-  '\n\n---\nYou are receiving this email because you are subscribed to our mailing list.\nTo unsubscribe, reply with "Unsubscribe" in the subject line.';
-
 /**
- * Send a single email via SendGrid.
- * Returns the SendGrid message ID on success.
- * Throws on failure (caller handles retry).
+ * Send a single email via the Supabase Edge Function (AWS SES).
+ * Keeps the same signature as before so callers need no changes.
  */
 export async function sendEmail({ to, toName, subject, body, isHtml, fromEmail, fromName }) {
-  const verifiedSender = process.env.FROM_EMAIL;
-  const isVerifiedSender = fromEmail === verifiedSender;
+  const htmlBody = isHtml
+    ? body + UNSUBSCRIBE_FOOTER_HTML
+    : `<p>${body.replace(/\n/g, '<br>')}</p>` + UNSUBSCRIBE_FOOTER_HTML;
 
-  const msg = {
-    to: toName ? { email: to, name: toName } : to,
-    from: {
-      email: verifiedSender,
-      name: fromName || process.env.FROM_NAME,
+  const res = await fetch(EDGE_FUNCTION_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${process.env.SUPABASE_ANON_KEY}`,
     },
-    // If a different sender was selected, route replies to them
-    ...((!isVerifiedSender && fromEmail) && {
-      replyTo: { email: fromEmail, name: fromName },
+    body: JSON.stringify({
+      contacts: [{ email: to, name: toName || '' }],
+      subject,
+      htmlBody,
+      fromEmail: fromEmail || process.env.FROM_EMAIL,
     }),
-    subject,
-  };
+  });
 
-  if (isHtml) {
-    msg.html = body + UNSUBSCRIBE_FOOTER_HTML;
-    msg.text = stripHtml(body) + UNSUBSCRIBE_FOOTER_TEXT;
-  } else {
-    msg.text = body + UNSUBSCRIBE_FOOTER_TEXT;
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error(err.error || err.message || `Edge function returned ${res.status}`);
   }
 
-  const [response] = await sgMail.send(msg);
-  return response.headers['x-message-id'] || null;
-}
-
-function stripHtml(html) {
-  return html
-    .replace(/<style[\s\S]*?<\/style>/gi, '')
-    .replace(/<script[\s\S]*?<\/script>/gi, '')
-    .replace(/<[^>]+>/g, ' ')
-    .replace(/\s{2,}/g, ' ')
-    .trim();
+  const data = await res.json().catch(() => ({}));
+  return data.messageId || null;
 }
