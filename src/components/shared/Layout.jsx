@@ -3,7 +3,7 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import {
   LayoutDashboard, Send, Users, FileText, BarChart3,
-  Settings, LogOut, Menu, X, ChevronRight, Sun, Moon
+  Settings, LogOut, Menu, X, ChevronRight, Sun, Moon, Zap
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { LOGO_URL } from '../../lib/logo'
