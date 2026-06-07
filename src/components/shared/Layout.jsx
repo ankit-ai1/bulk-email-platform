@@ -3,9 +3,10 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import {
   LayoutDashboard, Send, Users, FileText, BarChart3,
-  Settings, LogOut, Menu, X, ChevronRight, Zap, Sun, Moon
+  Settings, LogOut, Menu, X, ChevronRight, Sun, Moon
 } from 'lucide-react'
 import toast from 'react-hot-toast'
+import { LOGO_URL } from '../../lib/logo'
 import { useTheme } from '../../hooks/useTheme'
 
 const navItems = [
@@ -67,15 +68,10 @@ export default function Layout() {
           borderBottom: '1px solid var(--border)',
           display: 'flex', alignItems: 'center', gap: '12px'
         }}>
-          <div style={{
-            width: '36px', height: '36px', borderRadius: '10px',
-            background: 'linear-gradient(135deg, #6c63ff 0%, #a78bfa 100%)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 0 20px rgba(108,99,255,0.4)',
-            flexShrink: 0
-          }}>
-            <Zap size={18} color="white" />
-          </div>
+          <img src={LOGO_URL} alt="MailRax logo" style={{
+            width: '36px', height: '36px', borderRadius: '12px',
+            objectFit: 'contain', flexShrink: 0
+          }} />
           <div>
             <div style={{
               fontFamily: 'var(--font-display)', fontWeight: 800,

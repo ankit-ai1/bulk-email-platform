@@ -3,8 +3,7 @@ import { supabase } from '../lib/supabase'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { Eye, EyeOff, Lock, CheckCircle } from 'lucide-react'
-
-const LOGO = 'https://res.cloudinary.com/dtg3lepr4/image/upload/v1780738217/WhatsApp_Image_2026-06-06_at_2.50.11_PM_1_nrubcm.jpg'
+import { LOGO_URL } from '../lib/logo'
 import SiteFooter from '../components/shared/SiteFooter'
 
 export default function ResetPasswordPage() {
@@ -48,7 +47,7 @@ export default function ResetPasswordPage() {
       <div style={{ width: '100%', maxWidth: '400px', animation: 'slideUp 0.3s ease' }}>
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-            <img src={LOGO} alt="" style={{ height: '44px', width: 'auto', objectFit: 'contain' }} />
+            <img src={LOGO_URL} alt="MailRax logo" style={{ height: '44px', width: 'auto', objectFit: 'contain' }} />
             <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '26px', color: 'var(--text-primary)' }}>MailRax</span>
           </div>
           <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '26px', color: 'var(--text-primary)', marginBottom: '6px' }}>

@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom'
 import { CheckCircle } from 'lucide-react'
-
-const LOGO = 'https://res.cloudinary.com/dtg3lepr4/image/upload/v1780738217/WhatsApp_Image_2026-06-06_at_2.50.11_PM_1_nrubcm.jpg'
+import { LOGO_URL } from '../../lib/logo'
 
 export default function SiteFooter() {
   return (
@@ -14,7 +13,7 @@ export default function SiteFooter() {
           {/* Brand */}
           <div>
             <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '9px', marginBottom: '14px', textDecoration: 'none' }}>
-              <img src={LOGO} alt="" style={{ height: '34px', width: 'auto', objectFit: 'contain' }} />
+              <img src={LOGO_URL} alt="MailRax logo" style={{ height: '34px', width: 'auto', objectFit: 'contain' }} />
               <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '17px', color: '#fff' }}>MailRax</span>
             </Link>
             <p style={{ fontSize: '12px', color: 'rgba(255,255,255,0.5)', lineHeight: '1.75', maxWidth: '200px' }}>

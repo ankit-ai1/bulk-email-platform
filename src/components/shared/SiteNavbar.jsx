@@ -1,8 +1,7 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
-
-const LOGO = 'https://res.cloudinary.com/dtg3lepr4/image/upload/v1780738217/WhatsApp_Image_2026-06-06_at_2.50.11_PM_1_nrubcm.jpg'
+import { LOGO_URL } from '../../lib/logo'
 
 const navLinks = [
   ['Home', '/'],
@@ -26,7 +25,7 @@ export default function SiteNavbar() {
 
         {/* Logo */}
         <Link to="/" onClick={() => setOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', flexShrink: 0 }}>
-          <img src={LOGO} alt="" style={{ height: '38px', width: 'auto', objectFit: 'contain' }} />
+          <img src={LOGO_URL} alt="MailRax logo" style={{ height: '38px', width: 'auto', objectFit: 'contain' }} />
           <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '18px', color: '#0f0f1a' }}>MailRax</span>
         </Link>
 

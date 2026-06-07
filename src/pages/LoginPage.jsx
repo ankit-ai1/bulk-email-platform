@@ -4,8 +4,8 @@ import { useAuth } from '../hooks/useAuth'
 import { useNavigate, Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { Eye, EyeOff, ArrowRight, ArrowLeft, Mail, Lock, User, Globe } from 'lucide-react'
+import { LOGO_URL } from '../lib/logo'
 
-const LOGO = 'https://res.cloudinary.com/dtg3lepr4/image/upload/v1780738217/WhatsApp_Image_2026-06-06_at_2.50.11_PM_1_nrubcm.jpg'
 const REMEMBER_KEY = 'mailrax_remembered_email'
 
 export default function LoginPage() {
@@ -207,7 +207,7 @@ export default function LoginPage() {
           padding: '28px 52px 0',
         }}>
           <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <img src={LOGO} alt="MailRax" style={{ height: '32px', width: 'auto', objectFit: 'contain' }} />
+            <img src={LOGO_URL} alt="MailRax" style={{ height: '32px', width: 'auto', objectFit: 'contain' }} />
             <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '17px', color: '#0f0f1a' }}>
               MailRax
             </span>
