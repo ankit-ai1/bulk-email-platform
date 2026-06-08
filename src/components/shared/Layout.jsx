@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { Outlet, NavLink, useNavigate } from 'react-router-dom'
+import { Outlet, NavLink, useNavigate, Link } from 'react-router-dom'
 import { useAuth } from '../../hooks/useAuth'
 import {
   LayoutDashboard, Send, Users, FileText, BarChart3,
-  Settings, LogOut, Menu, X, ChevronRight, Sun, Moon, Zap
+  Settings, LogOut, Menu, X, ChevronRight, Sun, Moon, Zap, Globe
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { LOGO_URL } from '../../lib/logo'
@@ -63,11 +63,16 @@ export default function Layout() {
         className={`sidebar ${mobileOpen ? 'open' : ''}`}
       >
         {/* Logo */}
-        <div style={{
+        <Link to="/home" style={{
           padding: '24px 20px',
           borderBottom: '1px solid var(--border)',
-          display: 'flex', alignItems: 'center', gap: '12px'
-        }}>
+          display: 'flex', alignItems: 'center', gap: '12px',
+          textDecoration: 'none',
+          transition: 'opacity 0.15s',
+        }}
+          onMouseEnter={e => e.currentTarget.style.opacity = '0.8'}
+          onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+        >
           <img src={LOGO_URL} alt="MailRax logo" style={{
             width: '36px', height: '36px', borderRadius: '12px',
             objectFit: 'contain', flexShrink: 0
@@ -81,7 +86,7 @@ export default function Layout() {
               Campaign Platform
             </div>
           </div>
-        </div>
+        </Link>
 
         {/* Navigation */}
         <nav style={{ flex: 1, padding: '16px 12px', display: 'flex', flexDirection: 'column', gap: '4px', overflowY: 'auto' }}>
@@ -155,6 +160,14 @@ export default function Layout() {
             {theme === 'dark' ? <Sun size={14} /> : <Moon size={14} />}
             {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
           </button>
+          <Link
+            to="/home"
+            className="btn btn-ghost btn-sm"
+            style={{ width: '100%', justifyContent: 'center', color: 'var(--text-muted)', marginBottom: '6px', textDecoration: 'none' }}
+          >
+            <Globe size={14} />
+            Visit Website
+          </Link>
           <button
             onClick={handleSignOut}
             className="btn btn-ghost btn-sm"
