@@ -68,6 +68,7 @@ function AppRoutes() {
       <Route path="/about" element={<AboutPage />} />
       <Route path="/pricing" element={<PricingPage />} />
       <Route path="/apply" element={<ApplyPage />} />
+      <Route path="/home" element={<LandingPage />} />
       <Route path="/" element={
         <ProtectedRoute>
           <Layout />

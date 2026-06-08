@@ -8,6 +8,11 @@ import { LOGO_URL } from '../lib/logo'
 
 const REMEMBER_KEY = 'mailrax_remembered_email'
 
+/* Homepage primary colors */
+const TEAL   = '#00c896'
+const PURPLE = '#6c63ff'
+const CTA_GRAD = `linear-gradient(135deg, ${TEAL}, ${PURPLE})`
+
 export default function LoginPage() {
   const { signIn, signUp } = useAuth()
   const navigate = useNavigate()
@@ -61,14 +66,40 @@ export default function LoginPage() {
   function switchMode(m) { setMode(m); setForgotSent(false); setSignupEmail(null) }
 
   return (
-    /* ── ROOT: side-by-side row ── */
     <div style={{
       display: 'flex',
       flexDirection: 'row',
       minHeight: '100vh',
       width: '100%',
       overflow: 'hidden',
+      fontFamily: 'var(--font-body)',
+      WebkitFontSmoothing: 'antialiased',
+      MozOsxFontSmoothing: 'grayscale',
     }}>
+
+      {/* Input focus styles — matches homepage teal/purple */}
+      <style>{`
+        .login-input {
+          width: 100%;
+          padding: 17px 50px;
+          border-radius: 14px;
+          border: 1.5px solid #e5e7eb;
+          font-size: 15px;
+          font-family: var(--font-body);
+          color: #111827;
+          outline: none;
+          background: #fff;
+          box-sizing: border-box;
+          transition: border-color 0.15s, box-shadow 0.15s;
+        }
+        .login-input::placeholder { color: #9ca3af; }
+        .login-input:focus {
+          border-color: ${PURPLE};
+          box-shadow: 0 0 0 3px rgba(108,99,255,0.14);
+        }
+        .login-input.no-icon { padding-left: 20px; }
+        .login-input.with-icon { padding-left: 50px; }
+      `}</style>
 
       {/* ═══════════════════════════════════
           LEFT DARK PANEL  (45%)
@@ -85,19 +116,25 @@ export default function LoginPage() {
           flexDirection: 'column',
           justifyContent: 'space-between',
           padding: '48px 56px',
-          background: '#140c06',
+          background: '#0f1117',
         }}
       >
-        {/* warm radial glow */}
+        {/* Cool blue-teal radial glow — matches homepage dark CTA section */}
         <div style={{
           position: 'absolute', inset: 0, pointerEvents: 'none',
-          background: 'radial-gradient(ellipse 80% 55% at 25% 35%, rgba(160,70,20,0.55) 0%, rgba(60,25,8,0.75) 55%, #0d0805 100%)',
+          background: 'radial-gradient(ellipse 80% 55% at 25% 35%, rgba(108,99,255,0.28) 0%, rgba(0,200,150,0.12) 48%, #080b12 100%)',
         }} />
-        {/* subtle grid dots */}
+        {/* Subtle grid dots */}
         <div style={{
           position: 'absolute', inset: 0, pointerEvents: 'none',
           backgroundImage: 'radial-gradient(rgba(255,255,255,0.035) 1px, transparent 1px)',
           backgroundSize: '30px 30px',
+        }} />
+        {/* Bottom teal orb */}
+        <div style={{
+          position: 'absolute', bottom: '-80px', right: '-60px', pointerEvents: 'none',
+          width: '320px', height: '320px', borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(0,200,150,0.15), transparent 70%)',
         }} />
 
         {/* TOP: tagline */}
@@ -119,9 +156,17 @@ export default function LoginPage() {
             color: '#fff',
             letterSpacing: '-0.025em',
             marginBottom: '36px',
+            fontVariationSettings: 'normal',
           }}>
             Send smarter.<br />
-            <span style={{ color: '#f97316' }}>Reach further.</span>
+            <span style={{
+              background: CTA_GRAD,
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+              backgroundClip: 'text',
+            }}>
+              Reach further.
+            </span>
           </h1>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '48px' }}>
@@ -134,11 +179,14 @@ export default function LoginPage() {
                 <div style={{
                   width: '20px', height: '20px', borderRadius: '50%', flexShrink: 0,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: 'rgba(249,115,22,0.18)', border: '1px solid rgba(249,115,22,0.38)',
+                  background: 'rgba(0,200,150,0.18)', border: '1px solid rgba(0,200,150,0.38)',
                 }}>
-                  <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#f97316' }} />
+                  <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: TEAL }} />
                 </div>
-                <span style={{ fontSize: '14px', color: 'rgba(255,255,255,0.52)', fontFamily: 'var(--font-body)' }}>
+                <span style={{
+                  fontSize: '14px', color: 'rgba(255,255,255,0.6)',
+                  fontFamily: 'var(--font-body)', fontWeight: 400, letterSpacing: '0.01em',
+                }}>
                   {text}
                 </span>
               </div>
@@ -158,29 +206,37 @@ export default function LoginPage() {
           }}>
             {/* live dot */}
             <div style={{ display: 'flex', alignItems: 'center', gap: '7px', marginBottom: '14px' }}>
-              <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 6px #22c55e' }} />
-              <span style={{ fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: 'var(--font-body)' }}>
+              <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: TEAL, boxShadow: `0 0 6px ${TEAL}` }} />
+              <span style={{
+                fontSize: '10px', fontWeight: 700, color: 'rgba(255,255,255,0.45)',
+                textTransform: 'uppercase', letterSpacing: '0.1em', fontFamily: 'var(--font-body)',
+              }}>
                 Campaign Live
               </span>
             </div>
 
-            {/* mini bar chart */}
+            {/* mini bar chart — teal/purple for last bars */}
             <div style={{ display: 'flex', alignItems: 'flex-end', gap: '3px', height: '40px', marginBottom: '14px' }}>
               {[35, 55, 42, 70, 50, 85, 62, 90, 70, 88].map((h, i) => (
                 <div key={i} style={{
                   flex: 1,
                   height: `${h}%`,
                   borderRadius: '3px 3px 0 0',
-                  background: i >= 7 ? 'linear-gradient(180deg, #f97316, #ef4444)' : 'rgba(255,255,255,0.14)',
+                  background: i >= 7
+                    ? `linear-gradient(180deg, ${TEAL}, ${PURPLE})`
+                    : 'rgba(255,255,255,0.14)',
                 }} />
               ))}
             </div>
 
             {/* stat number */}
-            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '28px', color: '#fff', lineHeight: 1 }}>
+            <div style={{
+              fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '28px',
+              color: '#fff', lineHeight: 1, fontVariationSettings: 'normal',
+            }}>
               34.7%
             </div>
-            <div style={{ fontSize: '12px', color: '#22c55e', marginTop: '4px', fontFamily: 'var(--font-body)' }}>
+            <div style={{ fontSize: '12px', color: TEAL, marginTop: '4px', fontFamily: 'var(--font-body)', fontWeight: 500 }}>
               ↑ Open rate · this week
             </div>
           </div>
@@ -201,14 +257,19 @@ export default function LoginPage() {
         zIndex: 1,
       }}>
 
-        {/* Top bar: logo + CTA */}
+        {/* Top bar — matches SiteNavbar style */}
         <div style={{
           display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '28px 52px 0',
+          padding: '0 52px',
+          height: '64px',
+          borderBottom: '1px solid rgba(0,0,0,0.07)',
         }}>
           <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <img src={LOGO_URL} alt="MailRax" style={{ height: '32px', width: 'auto', objectFit: 'contain' }} />
-            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '17px', color: '#0f0f1a' }}>
+            <img src={LOGO_URL} alt="MailRax" style={{ height: '36px', width: 'auto', objectFit: 'contain' }} />
+            <span style={{
+              fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '18px',
+              color: '#0f0f1a', fontVariationSettings: 'normal',
+            }}>
               MailRax
             </span>
           </Link>
@@ -246,11 +307,13 @@ export default function LoginPage() {
 
               {forgotSent ? (
                 <div style={{ textAlign: 'center', paddingTop: '24px' }}>
-                  <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-                    <Mail size={26} color="#22c55e" />
+                  <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(0,200,150,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                    <Mail size={26} color={TEAL} />
                   </div>
-                  <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '20px', color: '#0f0f1a', marginBottom: '8px' }}>Check your inbox</h3>
-                  <p style={{ color: '#9ca3af', fontSize: '14px', marginBottom: '28px' }}>
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '20px', color: '#0f0f1a', marginBottom: '8px', fontVariationSettings: 'normal' }}>
+                    Check your inbox
+                  </h3>
+                  <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '28px', fontFamily: 'var(--font-body)' }}>
                     Reset link sent to <strong style={{ color: '#374151' }}>{form.email}</strong>
                   </p>
                   <button onClick={() => switchMode('login')} style={ghostBtnStyle}>
@@ -260,7 +323,8 @@ export default function LoginPage() {
               ) : (
                 <form onSubmit={handleForgotPassword} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <PillInput type="email" placeholder="Email address" value={form.email}
-                    onChange={e => setForm({ ...form, email: e.target.value })} icon={<Mail size={16} color="#9ca3af" />} required />
+                    onChange={e => setForm({ ...form, email: e.target.value })}
+                    icon={<Mail size={16} color="#9ca3af" />} required />
                   <ActionButton loading={loading} label="Send Reset Link" />
                   <button type="button" onClick={() => switchMode('login')} style={ghostBtnStyle}>
                     <ArrowLeft size={14} /> Back to Sign In
@@ -273,14 +337,20 @@ export default function LoginPage() {
           {/* ── SIGNUP SUCCESS ── */}
           {signupEmail && (
             <div style={{ textAlign: 'center' }}>
-              <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: '#f0fdf4', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-                <Mail size={26} color="#22c55e" />
+              <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(0,200,150,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                <Mail size={26} color={TEAL} />
               </div>
-              <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '22px', color: '#0f0f1a', marginBottom: '8px' }}>Check your inbox</h3>
-              <p style={{ color: '#9ca3af', fontSize: '15px', marginBottom: '28px' }}>
+              <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '22px', color: '#0f0f1a', marginBottom: '8px', fontVariationSettings: 'normal' }}>
+                Check your inbox
+              </h3>
+              <p style={{ color: '#6b7280', fontSize: '15px', marginBottom: '28px', fontFamily: 'var(--font-body)' }}>
                 Verification link sent to <strong style={{ color: '#374151' }}>{signupEmail}</strong>
               </p>
-              <button type="button" onClick={() => setSignupEmail(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#f97316', fontSize: '14px', fontWeight: 700, fontFamily: 'var(--font-body)' }}>
+              <button
+                type="button"
+                onClick={() => setSignupEmail(null)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: PURPLE, fontSize: '14px', fontWeight: 700, fontFamily: 'var(--font-body)' }}
+              >
                 Already verified? Sign in →
               </button>
             </div>
@@ -302,7 +372,7 @@ export default function LoginPage() {
                     icon={<User size={16} color="#9ca3af" />} required />
                 )}
 
-                <PillInput type="email" placeholder="Email or Username" value={form.email}
+                <PillInput type="email" placeholder="Email address" value={form.email}
                   onChange={e => setForm({ ...form, email: e.target.value })}
                   icon={<Mail size={16} color="#9ca3af" />} required />
 
@@ -318,7 +388,8 @@ export default function LoginPage() {
                     onChange={e => setForm({ ...form, password: e.target.value })}
                     required
                     minLength={6}
-                    style={pillInputStyle}
+                    className="login-input with-icon"
+                    style={{ paddingRight: '52px' }}
                   />
                   <button
                     type="button"
@@ -337,8 +408,8 @@ export default function LoginPage() {
                         onClick={() => setRememberMe(v => !v)}
                         style={{
                           width: '17px', height: '17px', borderRadius: '4px', flexShrink: 0,
-                          border: `2px solid ${rememberMe ? '#f97316' : '#d1d5db'}`,
-                          background: rememberMe ? '#f97316' : 'transparent',
+                          border: `2px solid ${rememberMe ? PURPLE : '#d1d5db'}`,
+                          background: rememberMe ? PURPLE : 'transparent',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           cursor: 'pointer', transition: 'all 0.15s',
                         }}
@@ -354,7 +425,7 @@ export default function LoginPage() {
                     <button
                       type="button"
                       onClick={() => switchMode('forgot')}
-                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#f97316', fontSize: '13px', fontWeight: 600, fontFamily: 'var(--font-body)', padding: 0 }}
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', color: PURPLE, fontSize: '13px', fontWeight: 600, fontFamily: 'var(--font-body)', padding: 0 }}
                     >
                       Forgot password?
                     </button>
@@ -376,7 +447,7 @@ export default function LoginPage() {
             © {new Date().getFullYear()} MailRax Inc.
           </p>
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <Link to="/contact" style={{ fontSize: '12px', color: '#9ca3af', textDecoration: 'none', fontFamily: 'var(--font-body)' }}>
+            <Link to="/contact" style={{ fontSize: '12px', color: '#9ca3af', textDecoration: 'none', fontFamily: 'var(--font-body)', transition: 'color 0.15s' }}>
               Contact Us
             </Link>
             <button style={{ display: 'flex', alignItems: 'center', gap: '4px', background: 'none', border: 'none', cursor: 'pointer', fontSize: '12px', color: '#9ca3af', fontFamily: 'var(--font-body)', padding: 0 }}>
@@ -405,7 +476,7 @@ function PillInput({ type, placeholder, value, onChange, icon, required }) {
         value={value}
         onChange={onChange}
         required={required}
-        style={{ ...pillInputStyle, paddingLeft: icon ? '50px' : '20px' }}
+        className={`login-input ${icon ? 'with-icon' : 'no-icon'}`}
       />
     </div>
   )
@@ -419,22 +490,26 @@ function ActionButton({ loading, label }) {
       style={{
         width: '100%',
         padding: '17px 24px',
-        borderRadius: '100px',
+        borderRadius: '14px',
         border: 'none',
-        background: loading ? '#e5e7eb' : 'linear-gradient(90deg, #f97316 0%, #ef4444 100%)',
+        background: loading ? '#e5e7eb' : `linear-gradient(135deg, ${TEAL}, ${PURPLE})`,
         color: loading ? '#9ca3af' : '#fff',
         fontFamily: 'var(--font-display)',
+        fontVariationSettings: 'normal',
         fontWeight: 700,
         fontSize: '16px',
         cursor: loading ? 'not-allowed' : 'pointer',
-        boxShadow: loading ? 'none' : '0 8px 28px rgba(249,115,22,0.38)',
+        boxShadow: loading ? 'none' : '0 8px 28px rgba(108,99,255,0.32)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         gap: '8px',
         marginTop: '8px',
-        transition: 'opacity 0.2s',
+        transition: 'opacity 0.2s, transform 0.2s',
+        letterSpacing: '0.01em',
       }}
+      onMouseEnter={e => { if (!loading) e.currentTarget.style.transform = 'translateY(-1px)' }}
+      onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)' }}
     >
       {loading ? <div className="spinner" /> : <>{label} <ArrowRight size={17} /></>}
     </button>
@@ -443,35 +518,25 @@ function ActionButton({ loading, label }) {
 
 /* ── Shared style objects ── */
 
-const pillInputStyle = {
-  width: '100%',
-  padding: '17px 50px 17px 50px',
-  borderRadius: '100px',
-  border: '1.5px solid #e5e7eb',
-  fontSize: '15px',
-  fontFamily: 'var(--font-body)',
-  color: '#111827',
-  outline: 'none',
-  background: '#fff',
-  boxSizing: 'border-box',
-  transition: 'border-color 0.15s',
-}
-
 const headingStyle = {
   fontFamily: 'var(--font-display)',
-  fontWeight: 800,
-  fontSize: '34px',
-  color: '#0f0f1a',
-  marginBottom: '6px',
+  fontVariationSettings: 'normal',
+  fontWeight: 700,
+  fontSize: '32px',
+  color: '#0D0D0D',
+  marginBottom: '8px',
   lineHeight: 1.15,
+  letterSpacing: '-0.02em',
 }
 
 const subStyle = {
-  fontSize: '15px',
-  color: '#9ca3af',
+  fontSize: '0.95rem',
+  color: '#6b7280',
   marginBottom: '32px',
   fontFamily: 'var(--font-body)',
+  fontWeight: 400,
   lineHeight: 1.6,
+  letterSpacing: '0.01em',
 }
 
 const topLinkStyle = {
@@ -482,20 +547,23 @@ const topLinkStyle = {
   border: 'none',
   cursor: 'pointer',
   fontSize: '14px',
-  fontWeight: 600,
-  color: '#6b7280',
+  fontWeight: 500,
+  color: '#666',
   fontFamily: 'var(--font-body)',
-  padding: 0,
+  padding: '7px 13px',
+  borderRadius: '8px',
+  transition: 'color 0.15s',
 }
 
 const ghostBtnStyle = {
   width: '100%',
   padding: '15px',
-  borderRadius: '100px',
+  borderRadius: '14px',
   border: '1.5px solid #e5e7eb',
   background: '#fff',
   color: '#6b7280',
   fontFamily: 'var(--font-display)',
+  fontVariationSettings: 'normal',
   fontWeight: 600,
   fontSize: '14px',
   cursor: 'pointer',
