@@ -3,10 +3,12 @@ import { supabase } from '../lib/supabase'
 import { useNavigate } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { Eye, EyeOff, Lock, CheckCircle } from 'lucide-react'
-import { LOGO_URL } from '../lib/logo'
+import { BrandLockup } from '../components/shared/Brand'
+import { useTheme } from '../hooks/useTheme'
 import SiteFooter from '../components/shared/SiteFooter'
 
 export default function ResetPasswordPage() {
+  const { theme } = useTheme()
   const navigate = useNavigate()
   const [form, setForm] = useState({ password: '', confirm: '' })
   const [showPw, setShowPw] = useState(false)
@@ -40,15 +42,14 @@ export default function ResetPasswordPage() {
       <div style={{
         position: 'absolute', top: '-20%', right: '-10%',
         width: '600px', height: '600px', borderRadius: '50%',
-        background: 'radial-gradient(circle, rgba(108,99,255,0.08) 0%, transparent 70%)',
+        background: 'radial-gradient(circle, rgba(23,61,90,0.08) 0%, transparent 70%)',
         pointerEvents: 'none',
       }} />
 
       <div style={{ width: '100%', maxWidth: '400px', animation: 'slideUp 0.3s ease' }}>
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
-            <img src={LOGO_URL} alt="MailRax logo" style={{ height: '44px', width: 'auto', objectFit: 'contain' }} />
-            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '26px', color: 'var(--text-primary)' }}>MailRax</span>
+            <BrandLockup onDark={theme === 'dark'} size="lg" />
           </div>
           <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '26px', color: 'var(--text-primary)', marginBottom: '6px' }}>
             Set New Password
@@ -59,7 +60,7 @@ export default function ResetPasswordPage() {
         <div className="card" style={{ padding: '32px' }}>
           {done ? (
             <div style={{ textAlign: 'center', padding: '16px 0' }}>
-              <CheckCircle size={48} color="#43e97b" style={{ margin: '0 auto 16px', display: 'block' }} />
+              <CheckCircle size={48} color="#8fb0c0" style={{ margin: '0 auto 16px', display: 'block' }} />
               <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '18px', marginBottom: '8px' }}>
                 Password Updated!
               </h3>

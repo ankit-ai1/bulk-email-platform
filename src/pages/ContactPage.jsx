@@ -1,105 +1,115 @@
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
+import { motion } from 'framer-motion'
+import { Clock, Copy, Mail, MapPin, Send, Zap } from 'lucide-react'
+import toast from 'react-hot-toast'
+import { supabase } from '../lib/supabase'
 import SiteNavbar from '../components/shared/SiteNavbar'
 import SiteFooter from '../components/shared/SiteFooter'
-import { Mail, HeadphonesIcon, Shield, Scale, ArrowRight, Clock, MessageSquare } from 'lucide-react'
 
-const contacts = [
-  { icon: Mail, title: 'General Enquiries', description: 'Questions about our platform, pricing, or features? We\'ll point you in the right direction.', email: 'hello@mailrax.app', color: '#00c896' },
-  { icon: HeadphonesIcon, title: 'Technical Support', description: 'Having issues with your account, campaigns, or deliverability? We\'re here to help.', email: 'support@mailrax.app', color: '#6c63ff' },
-  { icon: Shield, title: 'Abuse & Compliance', description: 'Report spam, policy violations, or suspicious activity originating from our platform.', email: 'abuse@mailrax.app', color: '#ef4444' },
-  { icon: Scale, title: 'Legal & Privacy', description: 'Data requests, legal notices, GDPR requests, and privacy-related concerns.', email: 'legal@mailrax.app', color: '#f59e0b' },
-]
+const EMAIL = 'hr@synerax.in'
+const OFFICE = 'Noida, India'
+const ENQUIRIES = ['Getting access to Synerax Mail', 'Plans and pricing', 'Support for an existing account', 'Partnership', 'Something else']
+const EMPTY = { name: '', company: '', email: '', phone: '', type: '', message: '', website: '' }
+const ease = [0.22, 1, 0.36, 1]
 
-const responseTimes = [
-  { type: 'General enquiries', time: 'Within 2 business days' },
-  { type: 'Technical support', time: 'Within 24 hours' },
-  { type: 'Abuse reports', time: 'Within 12 hours' },
-  { type: 'Legal & privacy', time: 'Within 5 business days' },
-]
+function InfoCard({ icon: Icon, label, value }) {
+  const copy = () => navigator.clipboard.writeText(value).then(() => toast.success('Copied'))
+  return (
+    <div className="ct-card">
+      <span className="ct-icon"><Icon size={20} /></span>
+      <div className="ct-card-body"><small>{label}</small><b>{value}</b></div>
+      <button type="button" className="ct-copy" onClick={copy} aria-label={`Copy ${label}`}><Copy size={15} /></button>
+    </div>
+  )
+}
 
 export default function ContactPage() {
+  const [form, setForm] = useState(EMPTY)
+  const [busy, setBusy] = useState(false)
+  const set = key => e => setForm(f => ({ ...f, [key]: e.target.value }))
+
+  async function submit(e) {
+    e.preventDefault()
+    // Filled only by bots: the field is invisible to people.
+    if (form.website) { setForm(EMPTY); return }
+    setBusy(true)
+    const phone = form.phone.trim() ? `+91 ${form.phone.trim()}` : ''
+    const { error } = await supabase.from('applications').insert({
+      business_name: form.company.trim() || form.name.trim(),
+      contact_name: form.name.trim(),
+      email: form.email.trim().toLowerCase(),
+      plan: 'contact',
+      use_case: form.type,
+      notes: [phone && `Phone: ${phone}`, form.message.trim()].filter(Boolean).join('\n'),
+      status: 'pending',
+    })
+    setBusy(false)
+    if (error) { toast.error(`Could not send your message. Please email ${EMAIL}.`); return }
+    toast.success('Message sent. We will be in touch.')
+    setForm(EMPTY)
+  }
+
   return (
-    <div style={{ minHeight: '100vh', background: '#fff', color: '#0f0f1a', fontFamily: 'var(--font-body)' }}>
+    <div className="site">
       <SiteNavbar />
-
-      {/* Hero */}
-      <section className="pub-pad" style={{ paddingTop: '80px', paddingBottom: '64px', background: 'linear-gradient(160deg,#f3f0ff 0%,#fff 60%)', position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: '-60px', right: '8%', width: '300px', height: '300px', borderRadius: '50%', background: 'radial-gradient(circle,rgba(108,99,255,0.08),transparent 70%)', pointerEvents: 'none' }} />
-        <div style={{ maxWidth: '1280px', margin: '0 auto', position: 'relative' }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: 'rgba(108,99,255,0.08)', border: '1px solid rgba(108,99,255,0.2)', borderRadius: '20px', padding: '6px 16px', marginBottom: '24px', fontSize: '11px', fontWeight: 700, color: '#6c63ff', letterSpacing: '0.08em' }}>
-            <MessageSquare size={12} /> GET IN TOUCH
-          </div>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 'clamp(32px,5vw,58px)', lineHeight: '1.1', maxWidth: '700px', marginBottom: '20px', letterSpacing: '-0.02em', color: '#0f0f1a' }}>
-            We're here to{' '}
-            <span style={{ background: 'linear-gradient(135deg,#6c63ff,#00c896)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              help you
-            </span>
-          </h1>
-          <p style={{ fontSize: '16px', color: '#888', maxWidth: '540px', lineHeight: '1.8' }}>
-            Reach out to the right team below and we'll get back to you as quickly as possible.
-          </p>
-        </div>
+      <section className="ct-hero">
+        <motion.div initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, ease }}>
+          <span className="ct-label">Contact</span>
+          <h1>Let’s <em>connect</em></h1>
+          <p>Questions about Synerax Mail, your plan or a partnership? Send us a message and a real person will reply.</p>
+          <span className="ct-pill"><Zap size={15} /> We reply within 24 hours</span>
+        </motion.div>
       </section>
 
-      {/* Contact cards */}
-      <section className="pub-pad" style={{ paddingBottom: '64px' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(280px,1fr))', gap: '16px' }}>
-          {contacts.map(({ icon: Icon, title, description, email, color }) => (
-            <div key={email} style={{ background: '#fff', border: '1.5px solid rgba(0,0,0,0.07)', borderRadius: '16px', padding: '28px', boxShadow: '0 4px 16px rgba(0,0,0,0.05)', display: 'flex', flexDirection: 'column', gap: '14px', position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '3px', background: `linear-gradient(90deg,${color},transparent)` }} />
-              <div style={{ width: '46px', height: '46px', borderRadius: '12px', background: `${color}10`, border: `1px solid ${color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <Icon size={20} color={color} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0f0f1a', marginBottom: '8px' }}>{title}</h3>
-                <p style={{ fontSize: '13px', color: '#888', lineHeight: '1.75', marginBottom: '16px' }}>{description}</p>
-                <a href={`mailto:${email}`} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', fontSize: '13px', color, textDecoration: 'none', fontWeight: 600 }}>
-                  {email} <ArrowRight size={13} />
-                </a>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Response times */}
-      <section className="pub-pad" style={{ paddingBottom: '64px' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
-          <div style={{ background: '#f8f9fc', border: '1.5px solid rgba(0,0,0,0.06)', borderRadius: '20px', padding: '40px 48px', display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: '40px' }}>
-            <div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(0,200,150,0.1)', border: '1px solid rgba(0,200,150,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Clock size={18} color="#00c896" />
-                </div>
-                <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0f0f1a' }}>Response Times</h2>
-              </div>
-              <p style={{ fontSize: '13px', color: '#888', lineHeight: '1.75' }}>Our team responds to all enquiries as fast as possible. Abuse reports are always prioritized.</p>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              {responseTimes.map(({ type, time }, i) => (
-                <div key={type} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '13px 0', gap: '16px', borderBottom: i < responseTimes.length - 1 ? '1px solid rgba(0,0,0,0.06)' : 'none' }}>
-                  <span style={{ fontSize: '13px', color: '#666' }}>{type}</span>
-                  <span style={{ fontSize: '12px', color: '#00c896', fontWeight: 600, background: 'rgba(0,200,150,0.08)', border: '1px solid rgba(0,200,150,0.15)', borderRadius: '6px', padding: '3px 10px', whiteSpace: 'nowrap' }}>{time}</span>
-                </div>
-              ))}
+      <section className="ct-body">
+        <motion.div className="ct-info" initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.1, ease }}>
+          <InfoCard icon={Mail} label="Email" value={EMAIL} />
+          <InfoCard icon={MapPin} label="Office" value={OFFICE} />
+          <div className="ct-card ct-hours">
+            <span className="ct-icon"><Clock size={20} /></span>
+            <div className="ct-card-body">
+              <small>Business hours</small>
+              <div className="ct-hour"><span>Monday – Saturday</span><b>9:00 AM – 8:00 PM IST</b></div>
+              <div className="ct-hour"><span>Sunday</span><b>Closed</b></div>
             </div>
           </div>
-        </div>
-      </section>
-
-      {/* CTA */}
-      <section className="pub-pad" style={{ paddingBottom: '80px' }}>
-        <div style={{ maxWidth: '1280px', margin: '0 auto', background: 'linear-gradient(135deg,#f0f4ff,#f0fff8)', border: '1.5px solid rgba(0,200,150,0.15)', borderRadius: '16px', padding: '40px 48px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '24px', flexWrap: 'wrap' }}>
-          <div>
-            <h3 style={{ fontFamily: 'var(--font-display)', fontSize: '20px', fontWeight: 800, color: '#0f0f1a', marginBottom: '8px' }}>Ready to get started?</h3>
-            <p style={{ fontSize: '14px', color: '#888' }}>Browse our plans and apply for access in under 5 minutes.</p>
+          <div className="ct-map" aria-hidden="true">
+            <svg viewBox="0 0 520 240" preserveAspectRatio="xMidYMid slice">
+              <defs><pattern id="ct-grid" width="44" height="34" patternUnits="userSpaceOnUse" patternTransform="rotate(-6)"><path d="M44 0H0V34" fill="none" stroke="rgba(255,255,255,.12)" /></pattern></defs>
+              <rect width="520" height="240" fill="url(#ct-grid)" />
+              <path d="M90 0C100 90 70 170 110 240M390 0C370 90 410 170 380 240" fill="none" stroke="rgba(255,255,255,.14)" strokeWidth="6" />
+              <path d="M0 175C110 150 170 180 240 160S360 75 520 95" fill="none" stroke="#e0bd8c" strokeWidth="5" />
+            </svg>
+            <span className="ct-map-pin"><MapPin size={20} /></span>
+            <div className="ct-map-tag"><b>Synerax office</b><small>{OFFICE}</small></div>
           </div>
-          <Link to="/pricing" style={{ background: 'linear-gradient(135deg,#00c896,#6c63ff)', color: '#fff', textDecoration: 'none', fontSize: '14px', fontWeight: 700, padding: '12px 28px', borderRadius: '9px', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '8px', boxShadow: '0 6px 20px rgba(108,99,255,0.25)' }}>
-            View Plans <ArrowRight size={15} />
-          </Link>
-        </div>
-      </section>
+        </motion.div>
 
+        <motion.form className="ct-form" onSubmit={submit} initial={{ opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2, ease }}>
+          <input className="ct-trap" tabIndex={-1} autoComplete="off" aria-hidden="true" value={form.website} onChange={set('website')} />
+          <div className="ct-row">
+            <label>Full name <i>*</i><input value={form.name} onChange={set('name')} autoComplete="name" required /></label>
+            <label>Company<input value={form.company} onChange={set('company')} autoComplete="organization" /></label>
+          </div>
+          <div className="ct-row">
+            <label>Work email <i>*</i><input type="email" value={form.email} onChange={set('email')} autoComplete="email" required /></label>
+            <label>Phone
+              <span className="ct-phone"><span>+91</span><input type="tel" placeholder="98765 43210" value={form.phone} onChange={set('phone')} autoComplete="tel-national" /></span>
+            </label>
+          </div>
+          <label>Enquiry type <i>*</i>
+            <select value={form.type} onChange={set('type')} required>
+              <option value="">Select…</option>
+              {ENQUIRIES.map(t => <option key={t}>{t}</option>)}
+            </select>
+          </label>
+          <label>Message <i>*</i><textarea rows={4} placeholder="How can we help?" value={form.message} onChange={set('message')} required /></label>
+          <div className="ct-submit">
+            <small>By submitting, you agree to our <a href="/privacy-policy">privacy policy</a>.</small>
+            <button className="site-btn ct-send" disabled={busy}><Send size={16} /> {busy ? 'Sending…' : 'Send message'}</button>
+          </div>
+        </motion.form>
+      </section>
       <SiteFooter />
     </div>
   )

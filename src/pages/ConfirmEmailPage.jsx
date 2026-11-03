@@ -94,7 +94,7 @@ export default function ConfirmEmailPage() {
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: 'linear-gradient(135deg, #8fb0c0 0%, #8fb0c0 100%)',
       padding: '20px',
     }}>
       <div style={{
@@ -117,7 +117,7 @@ export default function ConfirmEmailPage() {
               justifyContent: 'center',
               animation: 'spin 1s linear infinite',
             }}>
-              <Loader size={40} color="#6c63ff" />
+              <Loader size={40} color="#173d5a" />
             </div>
             <h2 style={{
               color: '#333',
@@ -161,7 +161,7 @@ export default function ConfirmEmailPage() {
             <button
               onClick={() => navigate('/login')}
               style={{
-                background: '#6c63ff',
+                background: '#173d5a',
                 color: 'white',
                 border: 'none',
                 padding: '12px 24px',
@@ -171,8 +171,8 @@ export default function ConfirmEmailPage() {
                 cursor: 'pointer',
                 transition: 'background 0.3s',
               }}
-              onMouseEnter={(e) => e.target.style.background = '#5a52d5'}
-              onMouseLeave={(e) => e.target.style.background = '#6c63ff'}
+              onMouseEnter={(e) => e.target.style.background = '#123047'}
+              onMouseLeave={(e) => e.target.style.background = '#173d5a'}
             >
               Go to Login
             </button>
@@ -207,7 +207,7 @@ export default function ConfirmEmailPage() {
             <button
               onClick={() => navigate('/login')}
               style={{
-                background: '#6c63ff',
+                background: '#173d5a',
                 color: 'white',
                 border: 'none',
                 padding: '12px 24px',
@@ -217,8 +217,8 @@ export default function ConfirmEmailPage() {
                 cursor: 'pointer',
                 transition: 'background 0.3s',
               }}
-              onMouseEnter={(e) => e.target.style.background = '#5a52d5'}
-              onMouseLeave={(e) => e.target.style.background = '#6c63ff'}
+              onMouseEnter={(e) => e.target.style.background = '#123047'}
+              onMouseLeave={(e) => e.target.style.background = '#173d5a'}
             >
               Back to Login
             </button>

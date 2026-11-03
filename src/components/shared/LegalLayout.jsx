@@ -14,12 +14,12 @@ export function Section({ title, children }) {
         {label && (
           <span style={{
             minWidth: '30px', height: '30px', borderRadius: '8px',
-            background: 'linear-gradient(135deg,#00c896,#6c63ff)',
+            background: '#173d5a',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: '12px', fontWeight: 800, color: '#fff', flexShrink: 0, marginTop: '2px',
           }}>{label}</span>
         )}
-        <h2 style={{ fontSize: '17px', fontWeight: 700, color: '#0f0f1a', lineHeight: '1.4' }}>{rest}</h2>
+        <h2 style={{ fontSize: '17px', fontWeight: 700, color: '#16334a', lineHeight: '1.4' }}>{rest}</h2>
       </div>
       <div style={{ paddingLeft: label ? '44px' : '0', fontSize: '14.5px', color: '#555', lineHeight: '1.85', display: 'flex', flexDirection: 'column', gap: '12px' }}>
         {children}
@@ -28,17 +28,17 @@ export function Section({ title, children }) {
   )
 }
 
-export default function LegalLayout({ title, subtitle, badge, accentColor = '#6c63ff', date, children }) {
-  const bg = accentColor === '#00c896'
-    ? 'linear-gradient(160deg,#f0fff8 0%,#fff 60%)'
+export default function LegalLayout({ title, subtitle, badge, accentColor = '#173d5a', date, children }) {
+  const bg = accentColor === '#3f7492'
+    ? 'linear-gradient(160deg,#f7f2e8 0%,#fff 60%)'
     : accentColor === '#ef4444'
     ? 'linear-gradient(160deg,#fff5f5 0%,#fff 60%)'
     : accentColor === '#f59e0b'
     ? 'linear-gradient(160deg,#fffbeb 0%,#fff 60%)'
-    : 'linear-gradient(160deg,#f3f0ff 0%,#fff 60%)'
+    : 'linear-gradient(160deg,#f7f2e8 0%,#fff 60%)'
 
   return (
-    <div style={{ minHeight: '100vh', background: '#fff', fontFamily: 'var(--font-body)', color: '#0f0f1a', '--text-primary': '#0f0f1a', '--text-secondary': '#555', '--text-muted': '#888', '--accent': accentColor }}>
+    <div style={{ minHeight: '100vh', background: '#fff', fontFamily: 'var(--font-body)', color: '#16334a', '--text-primary': '#16334a', '--text-secondary': '#555', '--text-muted': '#888', '--accent': accentColor }}>
       <SiteNavbar />
 
       {/* Hero */}
@@ -51,7 +51,7 @@ export default function LegalLayout({ title, subtitle, badge, accentColor = '#6c
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '7px', background: `${accentColor}12`, border: `1px solid ${accentColor}30`, borderRadius: '20px', padding: '5px 14px', marginBottom: '18px', fontSize: '11px', fontWeight: 700, color: accentColor, letterSpacing: '0.08em', display: 'block', width: 'fit-content' }}>
             {badge}
           </div>
-          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 'clamp(28px,4vw,44px)', color: '#0f0f1a', marginBottom: '14px', letterSpacing: '-0.01em', lineHeight: '1.15' }}>
+          <h1 style={{ fontFamily: 'var(--font-display)', fontWeight: 900, fontSize: 'clamp(28px,4vw,44px)', color: '#16334a', marginBottom: '14px', letterSpacing: '-0.01em', lineHeight: '1.15' }}>
             {title}
           </h1>
           <p style={{ fontSize: '15px', color: '#666', lineHeight: '1.75', maxWidth: '580px', marginBottom: '20px' }}>{subtitle}</p>

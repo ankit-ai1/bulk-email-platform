@@ -1,95 +1,56 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { Menu, X } from 'lucide-react'
-import { LOGO_URL } from '../../lib/logo'
+import { ArrowRight, Menu, X } from 'lucide-react'
+import { BrandLockup } from './Brand'
 
 const navLinks = [
-  ['Home', '/'],
+  ['Home', '/home'],
+  ['Features', '/features'],
   ['About', '/about'],
   ['Pricing', '/pricing'],
   ['Contact', '/contact'],
 ]
 
 export default function SiteNavbar() {
-  const { pathname } = useLocation()
+  const { pathname, hash } = useLocation()
   const [open, setOpen] = useState(false)
+  const [scrolled, setScrolled] = useState(false)
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 12)
+    onScroll()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => window.removeEventListener('scroll', onScroll)
+  }, [])
+
+  const isActive = to => (pathname === to && !hash) || (to === '/home' && pathname === '/' && !hash)
 
   return (
-    <>
-      <nav style={{
-        position: 'sticky', top: 0, zIndex: 100,
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        height: '64px', borderBottom: '1px solid rgba(0,0,0,0.07)',
-        background: 'rgba(255,255,255,0.97)', backdropFilter: 'blur(16px)',
-      }} className="pub-nav">
+    <header className={`site-nav ${scrolled ? 'scrolled' : ''}`}>
+      <div className="site-nav-inner">
+        <Link to="/home" className="site-nav-brand" onClick={() => setOpen(false)} aria-label="Synerax Mail home"><BrandLockup /></Link>
 
-        {/* Logo */}
-        <Link to="/" onClick={() => setOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '8px', textDecoration: 'none', flexShrink: 0 }}>
-          <img src={LOGO_URL} alt="MailRax logo" style={{ height: '38px', width: 'auto', objectFit: 'contain' }} />
-          <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '18px', color: '#0f0f1a' }}>MailRax</span>
-        </Link>
+        <nav className="site-nav-menu" aria-label="Main">
+          {navLinks.map(([label, to]) => <Link key={to} to={to} className={isActive(to) ? 'active' : ''}>{label}</Link>)}
+        </nav>
 
-        {/* Desktop links */}
-        <div className="site-nav-desktop" style={{ display: 'flex', gap: '2px', alignItems: 'center' }}>
-          {navLinks.map(([l, t]) => {
-            const active = pathname === t
-            return (
-              <Link key={t} to={t} style={{
-                color: active ? '#0f0f1a' : '#666', textDecoration: 'none',
-                fontSize: '14px', fontWeight: active ? 600 : 500,
-                padding: '7px 13px', borderRadius: '8px',
-                background: active ? 'rgba(0,0,0,0.05)' : 'transparent',
-                transition: 'color 0.15s',
-              }}>{l}</Link>
-            )
-          })}
-          <Link to="/login" style={{ color: '#666', textDecoration: 'none', fontSize: '14px', fontWeight: 500, padding: '7px 13px' }}>Sign In</Link>
-          <Link to="/pricing" style={{ background: 'linear-gradient(135deg,#00c896,#6c63ff)', color: '#fff', textDecoration: 'none', fontSize: '14px', fontWeight: 700, padding: '9px 20px', borderRadius: '9px', boxShadow: '0 4px 14px rgba(108,99,255,0.28)', marginLeft: '6px', whiteSpace: 'nowrap' }}>
-            Apply for Access
-          </Link>
+        <div className="site-nav-actions">
+          <Link to="/login" className="site-nav-signin">Sign in</Link>
+          <Link to="/apply" className="site-btn site-btn-primary site-btn-sm">Request access <ArrowRight size={14} /></Link>
         </div>
 
-        {/* Hamburger (mobile only) */}
-        <button
-          className="site-nav-hamburger"
-          onClick={() => setOpen(v => !v)}
-          style={{ display: 'none', background: 'none', border: 'none', cursor: 'pointer', padding: '8px', color: '#0f0f1a', borderRadius: '8px' }}
-          aria-label="Toggle menu"
-        >
-          {open ? <X size={24} /> : <Menu size={24} />}
+        <button className="site-nav-toggle" onClick={() => setOpen(v => !v)} aria-label="Toggle menu" aria-expanded={open}>
+          {open ? <X size={22} /> : <Menu size={22} />}
         </button>
-      </nav>
+      </div>
 
-      {/* Mobile drawer */}
       {open && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 99,
-          background: '#fff', paddingTop: '72px',
-          display: 'flex', flexDirection: 'column',
-          overflowY: 'auto',
-        }}>
-          <div style={{ padding: '8px 20px 32px', display: 'flex', flexDirection: 'column' }}>
-            {navLinks.map(([l, t]) => (
-              <Link key={t} to={t} onClick={() => setOpen(false)} style={{
-                fontSize: '18px', fontWeight: 700, textDecoration: 'none',
-                color: pathname === t ? '#6c63ff' : '#0f0f1a',
-                padding: '16px 8px',
-                borderBottom: '1px solid #f0f0f5',
-              }}>{l}</Link>
-            ))}
-            <Link to="/login" onClick={() => setOpen(false)} style={{
-              fontSize: '18px', fontWeight: 700, textDecoration: 'none',
-              color: '#0f0f1a', padding: '16px 8px', borderBottom: '1px solid #f0f0f5',
-            }}>Sign In</Link>
-            <Link to="/pricing" onClick={() => setOpen(false)} style={{
-              marginTop: '24px', background: 'linear-gradient(135deg,#00c896,#6c63ff)',
-              color: '#fff', textDecoration: 'none', fontSize: '16px', fontWeight: 700,
-              padding: '15px 24px', borderRadius: '12px', textAlign: 'center',
-              boxShadow: '0 6px 20px rgba(108,99,255,0.3)',
-            }}>Apply for Access</Link>
-          </div>
+        <div className="site-nav-drawer">
+          {navLinks.map(([label, to]) => <Link key={to} to={to} onClick={() => setOpen(false)}>{label}</Link>)}
+          <Link to="/login" onClick={() => setOpen(false)}>Sign in</Link>
+          <Link to="/apply" className="site-btn site-btn-primary" onClick={() => setOpen(false)}>Request access</Link>
         </div>
       )}
-    </>
+    </header>
   )
 }

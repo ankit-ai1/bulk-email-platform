@@ -1,12 +1,15 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import { api } from '../lib/api'
+import EmailCheck from '../components/EmailCheck'
+import EmailBuilder, { renderBlocks } from '../components/EmailBuilder'
 import toast from 'react-hot-toast'
 import { Plus, FileText, Trash2, X, Eye, Pencil, Code, Search } from 'lucide-react'
 import { format } from 'date-fns'
 
 export default function TemplatesPage() {
-  const { user, loading: authLoading } = useAuth()
+  const { user, loading: authLoading, hasFeature, organization } = useAuth()
   const [templates, setTemplates] = useState([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -15,12 +18,29 @@ export default function TemplatesPage() {
   const [search, setSearch] = useState('')
   const [saving, setSaving] = useState(false)
   const [form, setForm] = useState({ name: '', subject: '', body: '', is_html: false })
+  const [blocks, setBlocks] = useState(null) // non-null while using the visual builder
+  const [aiBrief, setAiBrief] = useState('')
+  const [aiBusy, setAiBusy] = useState(false)
+
+  async function draftWithAi() {
+    setAiBusy(true)
+    try {
+      const r = await api('/api/ai/generate', { body: { kind: 'content', input: { brief: aiBrief, template_name: form.name } } })
+      setBlocks(null)
+      setForm(f => ({ ...f, subject: r.subject, body: r.html, is_html: true }))
+      toast.success('Draft ready. Review it before saving.')
+    } catch (err) {
+      toast.error(err.message)
+    } finally {
+      setAiBusy(false)
+    }
+  }
 
   useEffect(() => { if (user) loadTemplates() }, [user])
 
   async function loadTemplates() {
     setLoading(true)
-    const { data } = await supabase.from('templates').select('*').eq('user_id', user.id).order('created_at', { ascending: false })
+    const { data } = await supabase.from('templates').select('*').order('created_at', { ascending: false })
     setTemplates(data || [])
     setLoading(false)
   }
@@ -28,13 +48,14 @@ export default function TemplatesPage() {
   async function handleSave(e) {
     e.preventDefault()
     setSaving(true)
+    const row = blocks ? { ...form, body: renderBlocks(blocks, organization?.brand_color), is_html: true, builder_blocks: blocks } : { ...form, builder_blocks: null }
     try {
       if (editTemplate) {
-        const { error } = await supabase.from('templates').update({ ...form, updated_at: new Date().toISOString() }).eq('id', editTemplate.id)
+        const { error } = await supabase.from('templates').update({ ...row, updated_at: new Date().toISOString() }).eq('id', editTemplate.id)
         if (error) throw error
         toast.success('Template updated!')
       } else {
-        const { error } = await supabase.from('templates').insert({ ...form, user_id: user.id })
+        const { error } = await supabase.from('templates').insert({ ...row, user_id: user.id })
         if (error) throw error
         toast.success('Template created!')
       }
@@ -50,10 +71,13 @@ export default function TemplatesPage() {
   function openEdit(t) {
     setEditTemplate(t)
     setForm({ name: t.name, subject: t.subject || '', body: t.body || '', is_html: t.is_html || false })
+    setBlocks(t.builder_blocks || null)
     setShowModal(true)
   }
 
   function resetModal() {
+    setBlocks(null)
+    setAiBrief('')
     setShowModal(false)
     setEditTemplate(null)
     setForm({ name: '', subject: '', body: '', is_html: false })
@@ -92,10 +116,10 @@ export default function TemplatesPage() {
       </div>
 
       {/* Placeholder hint */}
-      <div style={{ background: 'rgba(108,99,255,0.08)', border: '1px solid rgba(108,99,255,0.2)', borderRadius: 'var(--radius-md)', padding: '14px 18px', marginBottom: '24px', display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+      <div style={{ background: 'color-mix(in srgb, var(--accent) 8%, transparent)', border: '1px solid color-mix(in srgb, var(--accent) 20%, transparent)', borderRadius: 'var(--radius-md)', padding: '14px 18px', marginBottom: '24px', display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
         <span style={{ fontSize: '13px', color: 'var(--text-secondary)', fontWeight: 500 }}>Available placeholders:</span>
         {PLACEHOLDERS.map(p => (
-          <code key={p} style={{ background: 'rgba(108,99,255,0.15)', color: 'var(--accent)', padding: '3px 8px', borderRadius: '5px', fontSize: '12px', fontFamily: 'monospace' }}>{p}</code>
+          <code key={p} style={{ background: 'color-mix(in srgb, var(--accent) 15%, transparent)', color: 'var(--accent)', padding: '3px 8px', borderRadius: '5px', fontSize: '12px', fontFamily: 'monospace' }}>{p}</code>
         ))}
       </div>
 
@@ -197,7 +221,19 @@ export default function TemplatesPage() {
                 <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Use HTML for rich formatting</span>
               </div>
 
-              <div className="input-group">
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                <button type="button" className={`btn btn-sm ${blocks ? 'btn-primary' : 'btn-secondary'}`} onClick={() => setBlocks(b => (b ? null : []))}>
+                  {blocks ? 'Switch to code editor' : 'Use drag-and-drop builder'}
+                </button>
+                {hasFeature('ai') && (
+                  <>
+                    <input className="input" style={{ flex: '1 1 220px', width: 'auto' }} aria-label="Describe the email" placeholder="Describe the email and let AI draft it" value={aiBrief} onChange={e => setAiBrief(e.target.value)} />
+                    <button type="button" className="btn btn-secondary btn-sm" disabled={!aiBrief.trim() || aiBusy} onClick={draftWithAi}>{aiBusy ? 'Drafting…' : 'Draft with AI'}</button>
+                  </>
+                )}
+              </div>
+
+              {blocks ? <EmailBuilder blocks={blocks} onChange={setBlocks} brandColor={organization?.brand_color} /> : <div className="input-group">
                 <label className="input-label">Email Body *</label>
                 <textarea
                   className="input"
@@ -210,10 +246,10 @@ export default function TemplatesPage() {
                   style={{ minHeight: '240px', fontFamily: form.is_html ? 'monospace' : 'var(--font-body)', fontSize: '13px' }}
                   required
                 />
-              </div>
+              </div>}
 
-              <div style={{ background: 'rgba(108,99,255,0.08)', borderRadius: 'var(--radius-sm)', padding: '12px 14px', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                💡 Use placeholders: {PLACEHOLDERS.map(p => <code key={p} style={{ background: 'rgba(108,99,255,0.15)', color: 'var(--accent)', padding: '1px 5px', borderRadius: '3px', margin: '0 2px' }}>{p}</code>)} — they'll be replaced with real contact data when sending.
+              <div style={{ background: 'color-mix(in srgb, var(--accent) 8%, transparent)', borderRadius: 'var(--radius-sm)', padding: '12px 14px', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                💡 Use placeholders: {PLACEHOLDERS.map(p => <code key={p} style={{ background: 'color-mix(in srgb, var(--accent) 15%, transparent)', color: 'var(--accent)', padding: '1px 5px', borderRadius: '3px', margin: '0 2px' }}>{p}</code>)} — they'll be replaced with real contact data when sending.
               </div>
 
               <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end' }}>
@@ -243,12 +279,7 @@ export default function TemplatesPage() {
               padding: '24px', minHeight: '200px', border: '1px solid var(--border)',
               fontSize: '14px', lineHeight: 1.7, color: 'var(--text-secondary)'
             }}>
-              {previewTemplate.is_html
-                ? <div dangerouslySetInnerHTML={{ __html: previewTemplate.body?.replace(/{{name}}/g, 'John').replace(/{{email}}/g, 'john@example.com').replace(/{{first_name}}/g, 'John') }} />
-                : <pre style={{ fontFamily: 'var(--font-body)', whiteSpace: 'pre-wrap', margin: 0 }}>
-                  {previewTemplate.body?.replace(/{{name}}/g, 'John').replace(/{{email}}/g, 'john@example.com').replace(/{{first_name}}/g, 'John')}
-                </pre>
-              }
+              <EmailCheck subject={previewTemplate.subject || ''} html={(previewTemplate.is_html ? previewTemplate.body : `<pre style="font-family:sans-serif;white-space:pre-wrap">${(previewTemplate.body || '').replace(/</g, '&lt;')}</pre>`)?.replace(/{{name}}/g, 'John').replace(/{{email}}/g, 'john@example.com').replace(/{{first_name}}/g, 'John')} />
             </div>
             <p style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '12px', textAlign: 'center' }}>Preview shown with sample data</p>
           </div>

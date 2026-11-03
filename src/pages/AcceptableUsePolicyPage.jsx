@@ -5,12 +5,12 @@ export default function AcceptableUsePolicyPage() {
     <LegalLayout
       badge="LEGAL · ACCEPTABLE USE"
       title="Acceptable Use Policy"
-      subtitle="This Acceptable Use Policy defines what is and is not permitted when using MailRax. All users must comply with this policy."
+      subtitle="This Acceptable Use Policy defines what is and is not permitted when using Synerax Mail. All users must comply with this policy."
       accentColor="#f59e0b"
       date="June 1, 2026"
     >
       <Section title="1. Permitted Uses">
-        <p>MailRax may be used for:</p>
+        <p>Synerax Mail may be used for:</p>
         <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <li>Sending newsletters and marketing emails to opted-in subscribers.</li>
           <li>Transactional emails such as order confirmations, receipts, and notifications.</li>
@@ -21,7 +21,7 @@ export default function AcceptableUsePolicyPage() {
       </Section>
 
       <Section title="2. Prohibited Uses">
-        <p>You must not use MailRax to:</p>
+        <p>You must not use Synerax Mail to:</p>
         <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <li>Send spam or unsolicited emails to recipients without prior consent.</li>
           <li>Distribute malware, ransomware, viruses, or other harmful software.</li>
@@ -36,7 +36,7 @@ export default function AcceptableUsePolicyPage() {
       </Section>
 
       <Section title="3. Prohibited Content Categories">
-        <p>The following content categories are explicitly prohibited on MailRax:</p>
+        <p>The following content categories are explicitly prohibited on Synerax Mail:</p>
         <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <li>Adult content sent to minors or without age verification.</li>
           <li>Content promoting violence, hatred, or discrimination.</li>
@@ -67,7 +67,7 @@ export default function AcceptableUsePolicyPage() {
       </Section>
 
       <Section title="6. Contact">
-        <p>To report a violation or ask questions about this policy: <a href="mailto:abuse@mailrax.app" style={{ color: '#f59e0b', textDecoration: 'none', fontWeight: 600 }}>abuse@mailrax.app</a></p>
+        <p>To report a violation or ask questions about this policy: <a href="mailto:hr@synerax.in" style={{ color: '#f59e0b', textDecoration: 'none', fontWeight: 600 }}>hr@synerax.in</a></p>
       </Section>
     </LegalLayout>
   )

@@ -1,231 +1,183 @@
-import { useState, useEffect } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useMemo, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
+import { addDays, addMonths, endOfMonth, endOfWeek, format, formatDistanceToNow, isSameDay, isSameMonth, startOfMonth, startOfWeek } from 'date-fns'
+import { Bell, ChevronLeft, ChevronRight, Contact2, FileText, Gauge, MousePointerClick, Plus, Send, Trophy, Workflow } from 'lucide-react'
 import { supabase } from '../lib/supabase'
+import { num, pct, unwrap } from '../lib/api'
 import { useAuth } from '../hooks/useAuth'
-import { Send, Users, FileText, BarChart3, TrendingUp, Clock, CheckCircle, XCircle, Plus, ArrowRight } from 'lucide-react'
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
-import { format, subDays } from 'date-fns'
+import { Badge, DataTable, Empty, Panel, Stat, StatGrid, useLoad } from '../components/ui'
+import { TrendChart } from '../components/charts'
+import { dailySeries, sumMetrics } from '../components/analytics'
+import { AdminOverviewPage } from './admin/AdminPages'
 
-const CustomTooltip = ({ active, payload, label }) => {
-  if (active && payload && payload.length) {
-    return (
-      <div style={{
-        background: 'var(--bg-elevated)', border: '1px solid var(--border)',
-        borderRadius: '8px', padding: '10px 14px', fontSize: '13px'
-      }}>
-        <p style={{ color: 'var(--text-muted)', marginBottom: '4px' }}>{label}</p>
-        {payload.map(p => (
-          <p key={p.dataKey} style={{ color: p.color, fontWeight: 600 }}>
-            {p.name}: {p.value}
-          </p>
-        ))}
+const dateOf = c => c.completed_at || c.launched_at || c.scheduled_at
+
+function MiniCalendar({ campaigns }) {
+  const navigate = useNavigate()
+  const [month, setMonth] = useState(() => startOfMonth(new Date()))
+  const days = useMemo(() => {
+    const out = []
+    const end = endOfWeek(endOfMonth(month))
+    for (let d = startOfWeek(month); d <= end; d = addDays(d, 1)) out.push(d)
+    return out
+  }, [month])
+
+  return (
+    <Panel title="Campaign calendar" actions={
+      <div className="mc-nav">
+        <button aria-label="Previous month" onClick={() => setMonth(m => addMonths(m, -1))}><ChevronLeft size={15} /></button>
+        <span>{format(month, 'MMMM yyyy')}</span>
+        <button aria-label="Next month" onClick={() => setMonth(m => addMonths(m, 1))}><ChevronRight size={15} /></button>
       </div>
-    )
-  }
-  return null
+    }>
+      <div className="mc-grid">
+        {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(d => <div key={d} className="mc-head">{d}</div>)}
+        {days.map(day => {
+          const items = campaigns.filter(c => dateOf(c) && isSameDay(new Date(dateOf(c)), day))
+          const sent = items.some(c => ['completed', 'sending'].includes(c.status))
+          const tone = !items.length ? '' : sent ? 'sent' : 'planned'
+          return (
+            <button key={day.toISOString()} onClick={() => navigate('/calendar')}
+              title={items.map(c => c.name).join(', ') || undefined}
+              aria-label={`${format(day, 'MMMM d')}${items.length ? `, ${items.length} campaign(s)` : ''}`}
+              className={`mc-day ${isSameMonth(day, month) ? '' : 'outside'} ${isSameDay(day, new Date()) ? 'today' : ''} ${tone}`}>
+              {format(day, 'd')}
+            </button>
+          )
+        })}
+      </div>
+      <div className="mc-legend">
+        <span><i className="sent" />Sent</span><span><i className="planned" />Planned</span><span><i className="today" />Today</span>
+      </div>
+    </Panel>
+  )
+}
+
+function TopCampaigns({ campaigns, metrics }) {
+  const top = campaigns
+    .map(c => ({ ...c, m: metrics.find(x => x.campaign_id === c.id) }))
+    .filter(c => Number(c.m?.sent) > 0)
+    .sort((a, b) => (b.m.unique_clicks / (b.m.delivered || 1)) - (a.m.unique_clicks / (a.m.delivered || 1)))
+    .slice(0, 3)
+  return (
+    <Panel title="Top campaigns" subtitle="Ranked by click rate">
+      {top.length === 0
+        ? <Empty icon={Trophy} title="No results yet" description="Your best campaigns appear here after they send." />
+        : (
+          <div className="top-tiles">
+            {top.map((c, i) => (
+              <Link key={c.id} to={`/campaigns/${c.id}`} className={`top-tile tone-${i}`}>
+                <span className="top-tile-name">{c.name}</span>
+                <span className="top-tile-value">{pct(c.m.unique_clicks, c.m.delivered)}</span>
+                <span className="top-tile-note">{num(c.m.sent)} sent</span>
+                <span className="top-tile-rank">{['1st', '2nd', '3rd'][i]}</span>
+              </Link>
+            ))}
+          </div>
+        )}
+    </Panel>
+  )
+}
+
+function CreditsRing({ left, total }) {
+  const percent = total ? Math.max(0, Math.round((left / total) * 100)) : 0
+  return (
+    <Panel title="Email credits" actions={<Link to="/usage" className="btn btn-ghost btn-sm">Details</Link>}>
+      <div className="credit-ring-row">
+        <div className="credit-ring" style={{ '--ring': `${percent}%` }} role="img" aria-label={`${percent}% of credits left`}>
+          <div><strong>{percent}%</strong><span>left</span></div>
+        </div>
+        <dl className="ui-kv">
+          <dt>Remaining</dt><dd>{num(left)}</dd>
+          <dt>Plan total</dt><dd>{num(total)}</dd>
+        </dl>
+      </div>
+    </Panel>
+  )
+}
+
+function TenantDashboard() {
+  const { user, isClientAdmin, can, subscription } = useAuth()
+  const { data, loading } = useLoad(async () => {
+    const count = async t => (await supabase.from(t).select('id', { count: 'exact', head: true })).count || 0
+    const [campaigns, metrics, daily, contacts, templates, automations, notifications] = await Promise.all([
+      can('campaigns') ? supabase.from('campaigns').select('id, name, status, subject, created_at, scheduled_at, launched_at, completed_at').order('created_at', { ascending: false }).limit(200) : { data: [] },
+      can('campaigns') ? supabase.from('campaign_metrics').select('*') : { data: [] },
+      can('analytics') ? supabase.from('daily_stats').select('*').gte('day', new Date(Date.now() - 30 * 86400000).toISOString().slice(0, 10)) : { data: [] },
+      can('contacts') ? count('contacts') : 0, can('templates') ? count('templates') : 0,
+      can('automation') ? supabase.from('automations').select('id', { count: 'exact', head: true }).eq('status', 'active') : { count: 0 },
+      supabase.from('notifications').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(5),
+    ])
+    return { campaigns: unwrap(campaigns), metrics: unwrap(metrics), daily: unwrap(daily), contacts, templates, automations: automations.count || 0, notifications: notifications.data || [] }
+  })
+
+  const totals = useMemo(() => sumMetrics(data?.metrics), [data])
+  const campaigns = data?.campaigns || []
+  const metrics = data?.metrics || []
+  const expiresIn = subscription?.expires_at ? Math.ceil((new Date(subscription.expires_at) - Date.now()) / 86400000) : null
+  const creditsLeft = subscription ? subscription.email_credits_total - subscription.email_credits_used : 0
+  const metricFor = id => metrics.find(m => m.campaign_id === id) || {}
+
+  return (
+    <>
+      {isClientAdmin && subscription && expiresIn !== null && expiresIn <= 14 && (
+        <p className="ui-note ui-note-warn">{expiresIn > 0 ? `Your subscription expires in ${expiresIn} day(s).` : 'Your subscription has expired.'} <Link to="/usage">Contact Synerax to renew</Link>.</p>
+      )}
+      {isClientAdmin && subscription && creditsLeft <= subscription.email_credits_total * 0.2 && (
+        <p className="ui-note ui-note-warn">{num(creditsLeft)} email credits left. <Link to="/usage">Request more</Link>.</p>
+      )}
+
+      <StatGrid>
+        {can('campaigns') && <Stat icon={Send} label="Emails sent" value={num(totals.sent)} hint={`${pct(totals.delivered, totals.sent)} delivered`} />}
+        {can('campaigns') && <Stat icon={MousePointerClick} label="Click rate" value={pct(totals.unique_clicks, totals.delivered)} hint={`${num(totals.unique_clicks)} clicks`} />}
+        {can('contacts') && <Stat icon={Contact2} label="Contacts" value={num(data?.contacts)} />}
+        {can('templates') && <Stat icon={FileText} label="Templates" value={num(data?.templates)} />}
+        {can('automation') && <Stat icon={Workflow} label="Automations" value={num(data?.automations)} hint="Active" />}
+        {isClientAdmin && subscription && <Stat icon={Gauge} label="Credits left" value={num(creditsLeft)} hint={`of ${num(subscription.email_credits_total)}`} />}
+      </StatGrid>
+
+      <div className="dash-grid">
+        <div className="dash-col">
+          {can('campaigns') && <MiniCalendar campaigns={campaigns} />}
+          <Panel title="Activity" subtitle="Your latest alerts">
+            {(data?.notifications || []).length === 0
+              ? <Empty icon={Bell} title="Nothing new" />
+              : data.notifications.map(n => (
+                <div key={n.id} className="activity-row">
+                  <span className="ui-strong">{n.title}</span>
+                  <span className="ui-muted">{formatDistanceToNow(new Date(n.created_at), { addSuffix: true })}</span>
+                  {n.body && <p>{n.body}</p>}
+                </div>
+              ))}
+          </Panel>
+        </div>
+        <div className="dash-col">
+          {can('analytics') && <Panel title="Sending performance" subtitle="Last 30 days. Opens are approximate."><TrendChart data={dailySeries(data?.daily)} height={250} /></Panel>}
+          {can('campaigns') && <TopCampaigns campaigns={campaigns} metrics={metrics} />}
+          {isClientAdmin && subscription && <CreditsRing left={creditsLeft} total={subscription.email_credits_total} />}
+        </div>
+      </div>
+
+      {can('campaigns') && (
+        <Panel title="Recent campaigns" actions={<>
+          <Link to="/campaigns" className="btn btn-ghost btn-sm">View all</Link>
+          <Link to="/campaigns?new=1" className="btn btn-primary btn-sm"><Plus size={14} /> New campaign</Link>
+        </>}>
+          <DataTable loading={loading} rows={campaigns.slice(0, 6)}
+            empty={<Empty icon={Send} title="No campaigns yet" description="Your first campaign takes a few minutes to set up." />}
+            columns={[
+              { key: 'name', label: 'Campaign', render: c => <Link to={`/campaigns/${c.id}`} className="ui-strong">{c.name}</Link> },
+              { key: 'status', label: 'Status', render: c => <Badge value={c.status} /> },
+              { key: 'sent', label: 'Sent', align: 'right', sort: false, render: c => num(metricFor(c.id).sent) },
+              { key: 'ctr', label: 'Click rate', align: 'right', sort: false, render: c => pct(metricFor(c.id).unique_clicks, metricFor(c.id).delivered) },
+            ]} />
+        </Panel>
+      )}
+    </>
+  )
 }
 
 export default function DashboardPage() {
-  const { user } = useAuth()
-  const navigate = useNavigate()
-  const [stats, setStats] = useState({ campaigns: 0, contacts: 0, templates: 0, sent: 0, delivered: 0, failed: 0 })
-  const [recentCampaigns, setRecentCampaigns] = useState([])
-  const [chartData, setChartData] = useState([])
-  const [loading, setLoading] = useState(true)
-
-  const name = user?.user_metadata?.full_name?.split(' ')[0] || 'there'
-
-  useEffect(() => {
-    loadDashboard()
-  }, [])
-
-  async function loadDashboard() {
-    setLoading(true)
-    try {
-      const [campaignsRes, contactsRes, templatesRes, logsRes] = await Promise.all([
-        supabase.from('campaigns').select('*', { count: 'exact' }).eq('user_id', user.id),
-        supabase.from('contact_lists').select('*', { count: 'exact' }).eq('user_id', user.id),
-        supabase.from('templates').select('*', { count: 'exact' }).eq('user_id', user.id),
-        supabase.from('email_logs').select('status').eq('user_id', user.id),
-      ])
-
-      const logs = logsRes.data || []
-      const sent = logs.length
-      const delivered = logs.filter(l => l.status === 'delivered').length
-      const failed = logs.filter(l => l.status === 'failed').length
-
-      setStats({
-        campaigns: campaignsRes.count || 0,
-        contacts: contactsRes.count || 0,
-        templates: templatesRes.count || 0,
-        sent, delivered, failed
-      })
-
-      const recent = campaignsRes.data?.slice(0, 5) || []
-      setRecentCampaigns(recent)
-
-      // Build chart data
-      const days = Array.from({ length: 7 }, (_, i) => {
-        const day = subDays(new Date(), 6 - i)
-        return { date: format(day, 'MMM d'), sent: Math.floor(Math.random() * 200), delivered: Math.floor(Math.random() * 180) }
-      })
-      setChartData(days)
-    } catch (e) {
-      console.error(e)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const statCards = [
-    { label: 'Total Campaigns', value: stats.campaigns, icon: Send, color: '#6c63ff', change: '+12%' },
-    { label: 'Contact Lists', value: stats.contacts, icon: Users, color: '#43e97b', change: '+5%' },
-    { label: 'Templates', value: stats.templates, icon: FileText, color: '#ff9f43', change: '+3%' },
-    { label: 'Emails Sent', value: stats.sent, icon: BarChart3, color: '#ff6584', change: '+28%' },
-  ]
-
-  return (
-    <div style={{ animation: 'slideIn 0.3s ease' }}>
-      {/* Header */}
-      <div className="page-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: '16px' }}>
-        <div>
-          <div style={{
-            fontSize: '12px', fontWeight: 600, color: 'var(--accent)',
-            textTransform: 'uppercase', letterSpacing: '0.1em',
-            fontFamily: 'var(--font-display)', marginBottom: '4px'
-          }}>
-            Welcome back
-          </div>
-          <h1 className="page-title">Hey, {name} 👋</h1>
-          <p className="page-subtitle">Here's what's happening with your campaigns today.</p>
-        </div>
-        <button className="btn btn-primary" onClick={() => navigate('/campaigns')}>
-          <Plus size={16} /> New Campaign
-        </button>
-      </div>
-
-      {/* Stats */}
-      <div className="stats-grid">
-        {statCards.map(({ label, value, icon: Icon, color, change }) => (
-          <div key={label} className="stat-card">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span className="stat-label">{label}</span>
-              <div style={{
-                width: '36px', height: '36px', borderRadius: '10px',
-                background: color + '20', display: 'flex', alignItems: 'center', justifyContent: 'center'
-              }}>
-                <Icon size={16} color={color} />
-              </div>
-            </div>
-            <div className="stat-value">{loading ? '—' : value.toLocaleString()}</div>
-            <div className="stat-change" style={{ color: '#43e97b' }}>
-              <TrendingUp size={12} /> {change} this month
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Delivery stats */}
-      <div className="grid-3" style={{ marginBottom: '32px' }}>
-        {[
-          { label: 'Delivered', value: stats.delivered, icon: CheckCircle, color: '#43e97b', bg: 'rgba(67,233,123,0.1)' },
-          { label: 'Failed', value: stats.failed, icon: XCircle, color: '#ff6584', bg: 'rgba(255,101,132,0.1)' },
-          { label: 'Pending', value: Math.max(0, stats.sent - stats.delivered - stats.failed), icon: Clock, color: '#ffc107', bg: 'rgba(255,193,7,0.1)' },
-        ].map(({ label, value, icon: Icon, color, bg }) => (
-          <div key={label} className="card" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <div style={{ width: '48px', height: '48px', borderRadius: '14px', background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <Icon size={22} color={color} />
-            </div>
-            <div>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontFamily: 'var(--font-display)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</div>
-              <div style={{ fontSize: '24px', fontWeight: 800, fontFamily: 'var(--font-display)', color: 'var(--text-primary)' }}>{loading ? '—' : value.toLocaleString()}</div>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Chart */}
-      <div className="card" style={{ marginBottom: '32px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
-          <div>
-            <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '16px' }}>Email Activity</h3>
-            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '2px' }}>Last 7 days overview</p>
-          </div>
-          <div style={{ display: 'flex', gap: '16px', fontSize: '12px' }}>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
-              <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#6c63ff', display: 'inline-block' }} /> Sent
-            </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'var(--text-secondary)' }}>
-              <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#43e97b', display: 'inline-block' }} /> Delivered
-            </span>
-          </div>
-        </div>
-        <ResponsiveContainer width="100%" height={220}>
-          <AreaChart data={chartData}>
-            <defs>
-              <linearGradient id="sent" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#6c63ff" stopOpacity={0.3} />
-                <stop offset="100%" stopColor="#6c63ff" stopOpacity={0} />
-              </linearGradient>
-              <linearGradient id="delivered" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#43e97b" stopOpacity={0.3} />
-                <stop offset="100%" stopColor="#43e97b" stopOpacity={0} />
-              </linearGradient>
-            </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.04)" />
-            <XAxis dataKey="date" tick={{ fontSize: 11, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
-            <YAxis tick={{ fontSize: 11, fill: 'var(--text-muted)' }} axisLine={false} tickLine={false} />
-            <Tooltip content={<CustomTooltip />} />
-            <Area type="monotone" dataKey="sent" name="Sent" stroke="#6c63ff" fill="url(#sent)" strokeWidth={2} dot={false} />
-            <Area type="monotone" dataKey="delivered" name="Delivered" stroke="#43e97b" fill="url(#delivered)" strokeWidth={2} dot={false} />
-          </AreaChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Recent Campaigns */}
-      <div className="card">
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
-          <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '16px' }}>Recent Campaigns</h3>
-          <button className="btn btn-ghost btn-sm" onClick={() => navigate('/campaigns')}>
-            View All <ArrowRight size={14} />
-          </button>
-        </div>
-        {recentCampaigns.length === 0 ? (
-          <div className="empty-state" style={{ padding: '32px' }}>
-            <div className="empty-icon"><Send size={24} /></div>
-            <p className="empty-title">No campaigns yet</p>
-            <p className="empty-desc">Create your first campaign to start sending emails</p>
-            <button className="btn btn-primary btn-sm" onClick={() => navigate('/campaigns')}>
-              <Plus size={14} /> Create Campaign
-            </button>
-          </div>
-        ) : (
-          <div className="table-container">
-            <table>
-              <thead>
-                <tr>
-                  <th>Campaign Name</th>
-                  <th>Status</th>
-                  <th>Created</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentCampaigns.map(c => (
-                  <tr key={c.id}>
-                    <td style={{ color: 'var(--text-primary)', fontWeight: 500 }}>{c.name}</td>
-                    <td>
-                      <span className={`badge badge-${c.status === 'completed' ? 'success' : c.status === 'sending' ? 'info' : c.status === 'failed' ? 'error' : 'neutral'}`}>
-                        {c.status || 'draft'}
-                      </span>
-                    </td>
-                    <td>{c.created_at ? format(new Date(c.created_at), 'MMM d, yyyy') : '—'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
-    </div>
-  )
+  const { isSuperAdmin } = useAuth()
+  return isSuperAdmin ? <AdminOverviewPage /> : <TenantDashboard />
 }

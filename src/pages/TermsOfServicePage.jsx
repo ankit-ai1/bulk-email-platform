@@ -5,16 +5,16 @@ export default function TermsOfServicePage() {
     <LegalLayout
       badge="LEGAL · TERMS"
       title="Terms of Service"
-      subtitle="By accessing or using MailRax, you agree to be bound by these Terms of Service. Please read them carefully."
-      accentColor="#00c896"
+      subtitle="By accessing or using Synerax Mail, you agree to be bound by these Terms of Service. Please read them carefully."
+      accentColor="#3f7492"
       date="June 1, 2026"
     >
       <Section title="1. Acceptance of Terms">
-        <p>By creating an account or using MailRax in any way, you agree to these Terms of Service and our Privacy Policy. If you do not agree, do not use the platform.</p>
+        <p>By creating an account or using Synerax Mail in any way, you agree to these Terms of Service and our Privacy Policy. If you do not agree, do not use the platform.</p>
       </Section>
 
       <Section title="2. Eligibility">
-        <p>You must be at least 18 years old and capable of forming a binding contract to use MailRax. By using our service, you represent that you meet these requirements.</p>
+        <p>You must be at least 18 years old and capable of forming a binding contract to use Synerax Mail. By using our service, you represent that you meet these requirements.</p>
       </Section>
 
       <Section title="3. Your Account">
@@ -27,7 +27,7 @@ export default function TermsOfServicePage() {
       </Section>
 
       <Section title="4. Acceptable Use">
-        <p>You agree to use MailRax only for lawful purposes. You must not:</p>
+        <p>You agree to use Synerax Mail only for lawful purposes. You must not:</p>
         <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <li>Send unsolicited bulk email (spam) to recipients who have not opted in.</li>
           <li>Use the platform to distribute malware, phishing content, or illegal material.</li>
@@ -42,11 +42,11 @@ export default function TermsOfServicePage() {
       </Section>
 
       <Section title="6. Intellectual Property">
-        <p>MailRax and its content, features, and functionality are owned by us and are protected by applicable intellectual property laws. You retain ownership of the content you create and upload to the platform.</p>
+        <p>Synerax Mail and its content, features, and functionality are owned by us and are protected by applicable intellectual property laws. You retain ownership of the content you create and upload to the platform.</p>
       </Section>
 
       <Section title="7. Limitation of Liability">
-        <p>To the maximum extent permitted by law, MailRax shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of the service. Our total liability shall not exceed the amount you paid us in the past 12 months.</p>
+        <p>To the maximum extent permitted by law, Synerax Mail shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of the service. Our total liability shall not exceed the amount you paid us in the past 12 months.</p>
       </Section>
 
       <Section title="8. Termination">
@@ -58,7 +58,7 @@ export default function TermsOfServicePage() {
       </Section>
 
       <Section title="10. Contact">
-        <p>Questions about these Terms? Contact us at: <a href="mailto:legal@mailrax.app" style={{ color: '#00c896', textDecoration: 'none', fontWeight: 600 }}>legal@mailrax.app</a></p>
+        <p>Questions about these Terms? Contact us at: <a href="mailto:hr@synerax.in" style={{ color: '#3f7492', textDecoration: 'none', fontWeight: 600 }}>hr@synerax.in</a></p>
       </Section>
     </LegalLayout>
   )

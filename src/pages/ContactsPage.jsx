@@ -7,6 +7,19 @@ import * as XLSX from 'xlsx'
 import { Upload, Users, Plus, Trash2, X, FileSpreadsheet, Search, ChevronDown, ChevronRight, Edit2, Mail, Check } from 'lucide-react'
 import { format } from 'date-fns'
 
+/** Accepts common header spellings, so "Total Spent" and total_spent both work. */
+function mapRow(row) {
+  const r = Object.fromEntries(Object.entries(row).map(([k, v]) => [k.trim().toLowerCase().replace(/[\s-]+/g, '_'), v]))
+  const out = { name: r.name || '', email: String(r.email || '').trim() }
+  for (const k of ['company', 'country', 'city', 'gender']) if (r[k]) out[k] = String(r[k])
+  if (r.tags) out.tags = String(r.tags).split(/[,;]/).map(t => t.trim()).filter(Boolean)
+  if (r.total_spent) out.total_spent = Number(r.total_spent) || 0
+  if (r.order_count) out.order_count = parseInt(r.order_count, 10) || 0
+  const purchased = r.last_purchase_at || r.last_purchase_date
+  if (purchased && !Number.isNaN(new Date(purchased).getTime())) out.last_purchase_at = new Date(purchased).toISOString()
+  return out
+}
+
 export default function ContactsPage() {
   const { user, loading: authLoading } = useAuth()
   const [lists, setLists] = useState([])
@@ -33,7 +46,7 @@ export default function ContactsPage() {
 
   async function loadLists() {
     setLoading(true)
-    const { data } = await supabase.from('contact_lists').select('*').eq('user_id', user.id).order('created_at', { ascending: false })
+    const { data } = await supabase.from('contact_lists').select('*').order('created_at', { ascending: false })
     setLists(data || [])
     setLoading(false)
   }
@@ -72,10 +85,7 @@ export default function ContactsPage() {
         header: true,
         skipEmptyLines: true,
         complete: ({ data }) => {
-          const contacts = data.map(r => ({
-            name: r.name || r.Name || r.NAME || '',
-            email: r.email || r.Email || r.EMAIL || ''
-          })).filter(c => c.email)
+          const contacts = data.map(mapRow).filter(c => c.email)
           setParsedContacts(contacts)
           toast.success(`Parsed ${contacts.length} contacts from CSV`)
         }
@@ -86,10 +96,7 @@ export default function ContactsPage() {
         const wb = XLSX.read(ev.target.result, { type: 'array' })
         const ws = wb.Sheets[wb.SheetNames[0]]
         const data = XLSX.utils.sheet_to_json(ws)
-        const contacts = data.map(r => ({
-          name: r.name || r.Name || r.NAME || '',
-          email: r.email || r.Email || r.EMAIL || ''
-        })).filter(c => c.email)
+        const contacts = data.map(mapRow).filter(c => c.email)
         setParsedContacts(contacts)
         toast.success(`Parsed ${contacts.length} contacts from CSV`)
       }
@@ -206,7 +213,7 @@ export default function ContactsPage() {
       const batchSize = 500
       for (let i = 0; i < newContacts.length; i += batchSize) {
         const batch = newContacts.slice(i, i + batchSize).map(c => ({
-          name: c.name,
+          ...c,
           email: c.email.toLowerCase(),
           list_id: currentList.id,
           user_id: user.id,
@@ -382,7 +389,7 @@ export default function ContactsPage() {
                 if (expandedList === list.id) setExpandedList(null)
                 else { setExpandedList(list.id); loadContacts(list.id); setListSearch('') }
               }}>
-                <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'rgba(108,99,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: 'color-mix(in srgb, var(--accent) 10%, transparent)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   <Users size={20} color="var(--accent)" />
                 </div>
                 <div style={{ flex: 1 }}>

@@ -1,79 +1,72 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useCallback, useContext, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { api } from '../lib/api'
 
 const AuthContext = createContext({})
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
+  const [context, setContext] = useState(null)
   const [loading, setLoading] = useState(true)
 
+  // UI convenience only. Every rule here is enforced again by RLS and the worker.
+  const loadContext = useCallback(async () => {
+    const { data } = await supabase.rpc('get_my_context')
+    setContext(data || null)
+    return data
+  }, [])
+
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      // Check if session user has confirmed email
-      if (session?.user && !session.user.email_confirmed_at) {
-        supabase.auth.signOut()
-        setUser(null)
-      } else {
-        setUser(session?.user ?? null)
-      }
+    const apply = async (session) => {
+      setUser(session?.user ?? null)
+      if (session?.user) await loadContext()
+      else setContext(null)
       setLoading(false)
-    })
+    }
+
+    supabase.auth.getSession().then(({ data: { session } }) => apply(session))
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      // Check if session user has confirmed email
-      if (session?.user && !session.user.email_confirmed_at) {
-        supabase.auth.signOut()
-        setUser(null)
-      } else {
-        setUser(session?.user ?? null)
-      }
+      // Deferred: calling Supabase inside this callback can deadlock its auth lock.
+      setTimeout(() => apply(session), 0)
     })
 
     return () => subscription.unsubscribe()
-  }, [])
+  }, [loadContext])
 
   const signIn = async (email, password) => {
     try {
       const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-      
       if (error) return { data, error }
-      
-      // Check if email is confirmed - if not, sign them out immediately
-      if (data.user && !data.user.email_confirmed_at) {
-        await supabase.auth.signOut()
-        return {
-          data: null,
-          error: {
-            message: 'Please verify your email before signing in. Check your inbox for the verification link.',
-            code: 'email_not_confirmed'
-          }
-        }
-      }
-      
+      api('/api/me/login').catch(() => {})
       return { data, error }
     } catch (err) {
       return { data: null, error: err }
     }
   }
 
-  const signUp = async (email, password, fullName) => {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: { full_name: fullName },
-        emailRedirectTo: `${window.location.origin}/confirm-email`,
-      }
-    })
-    return { data, error }
-  }
-
   const signOut = async () => {
     await supabase.auth.signOut()
   }
 
+  const profile = context?.profile ?? null
+  const role = profile?.role ?? null
+  const isSuperAdmin = role === 'super_admin'
+  const isClientAdmin = role === 'client_admin'
+  const features = context?.subscription?.features ?? {}
+
+  const can = (permission) => isClientAdmin || (role === 'campaign_manager' && profile?.permissions?.[permission] === true)
+  const hasFeature = (feature) => features[feature] === true
+
   return (
-    <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{
+      user, loading, signIn, signOut, refreshContext: loadContext,
+      context, profile, role, isSuperAdmin, isClientAdmin, can, hasFeature,
+      organization: context?.organization ?? null,
+      subscription: context?.subscription ?? null,
+      planName: context?.plan_name ?? null,
+      mfaRequired: context?.mfa_required === true,
+    }}>
       {children}
     </AuthContext.Provider>
   )

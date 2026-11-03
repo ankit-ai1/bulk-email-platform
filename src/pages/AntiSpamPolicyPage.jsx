@@ -5,7 +5,7 @@ export default function AntiSpamPolicyPage() {
     <LegalLayout
       badge="LEGAL · ANTI-SPAM"
       title="Anti-Spam Policy"
-      subtitle="MailRax has a zero-tolerance policy for spam. This policy outlines our requirements for responsible email sending."
+      subtitle="Synerax Mail has a zero-tolerance policy for spam. This policy outlines our requirements for responsible email sending."
       accentColor="#ef4444"
       date="June 1, 2026"
     >
@@ -24,7 +24,7 @@ export default function AntiSpamPolicyPage() {
       </Section>
 
       <Section title="3. Prohibited Content">
-        <p>You may not use MailRax to send:</p>
+        <p>You may not use Synerax Mail to send:</p>
         <ul style={{ paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <li>Unsolicited commercial email (spam).</li>
           <li>Phishing or fraudulent messages designed to deceive recipients.</li>
@@ -64,7 +64,7 @@ export default function AntiSpamPolicyPage() {
       </Section>
 
       <Section title="7. Reporting Spam">
-        <p>If you receive spam sent via MailRax, please report it to: <a href="mailto:abuse@mailrax.app" style={{ color: '#ef4444', textDecoration: 'none', fontWeight: 600 }}>abuse@mailrax.app</a>. We investigate all reports and take appropriate action.</p>
+        <p>If you receive spam sent via Synerax Mail, please report it to: <a href="mailto:hr@synerax.in" style={{ color: '#ef4444', textDecoration: 'none', fontWeight: 600 }}>hr@synerax.in</a>. We investigate all reports and take appropriate action.</p>
       </Section>
     </LegalLayout>
   )

@@ -5,8 +5,8 @@ export default function PrivacyPolicyPage() {
     <LegalLayout
       badge="LEGAL · PRIVACY"
       title="Privacy Policy"
-      subtitle="This Privacy Policy explains how MailRax collects, uses, and protects your personal information when you use our bulk email platform."
-      accentColor="#6c63ff"
+      subtitle="This Privacy Policy explains how Synerax Mail collects, uses, and protects your personal information when you use our bulk email platform."
+      accentColor="#173d5a"
       date="June 1, 2026"
     >
       <Section title="1. Information We Collect">
@@ -56,7 +56,7 @@ export default function PrivacyPolicyPage() {
       </Section>
 
       <Section title="8. Contact">
-        <p>For privacy-related questions or requests, contact us at: <a href="mailto:privacy@mailrax.app" style={{ color: '#6c63ff', textDecoration: 'none', fontWeight: 600 }}>privacy@mailrax.app</a></p>
+        <p>For privacy-related questions or requests, contact us at: <a href="mailto:hr@synerax.in" style={{ color: '#173d5a', textDecoration: 'none', fontWeight: 600 }}>hr@synerax.in</a></p>
       </Section>
     </LegalLayout>
   )

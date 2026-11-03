@@ -21,8 +21,8 @@ export default function LogsPage() {
   async function loadData() {
     setLoading(true)
     const [logsRes, campRes] = await Promise.all([
-      supabase.from('email_logs').select('*').eq('user_id', user.id).order('created_at', { ascending: false }).limit(500),
-      supabase.from('campaigns').select('id, name').eq('user_id', user.id),
+      supabase.from('email_logs').select('*').order('created_at', { ascending: false }).limit(500),
+      supabase.from('campaigns').select('id, name'),
     ])
     setLogs(logsRes.data || [])
     setCampaigns(campRes.data || [])
@@ -74,9 +74,9 @@ export default function LogsPage() {
       </div>
 
       {/* Summary stats */}
-      <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+      <div className="stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))' }}>
         {[
-          { label: 'Total Sent', value: stats.total, color: '#6c63ff' },
+          { label: 'Total Sent', value: stats.total, color: 'var(--accent)' },
           { label: 'Delivered', value: stats.delivered, color: '#43e97b' },
           { label: 'Failed', value: stats.failed, color: '#ff6584' },
           { label: 'Pending', value: stats.pending, color: '#ffc107' },

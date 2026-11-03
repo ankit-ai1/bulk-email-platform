@@ -22,7 +22,7 @@ export default function PublicLayout({ children }) {
   const { pathname } = useLocation()
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#fff', color: '#0f0f1a', fontFamily: 'var(--font-body)', '--text-primary': '#0f0f1a', '--text-secondary': '#555', '--text-muted': '#888' }}>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: '#fff', color: '#16334a', fontFamily: 'var(--font-body)', '--text-primary': '#16334a', '--text-secondary': '#555', '--text-muted': '#888' }}>
 
       {/* Header */}
       <header style={{
@@ -35,14 +35,14 @@ export default function PublicLayout({ children }) {
           <Link to="/" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
             <div style={{
               width: '32px', height: '32px', borderRadius: '8px',
-              background: 'linear-gradient(135deg, #00c896, #6c63ff)',
+              background: '#173d5a',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(108,99,255,0.25)',
+              boxShadow: '0 4px 12px rgba(23,61,90,0.25)',
             }}>
               <Zap size={15} color="#fff" fill="#fff" />
             </div>
-            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '17px', color: '#0f0f1a' }}>
-              MailRax
+            <span style={{ fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '17px', color: '#16334a' }}>
+              Synerax Mail
             </span>
           </Link>
 
@@ -50,7 +50,7 @@ export default function PublicLayout({ children }) {
             {navLinks.map(({ label, to }) => (
               <Link key={to} to={to} style={{
                 fontSize: '13px', fontWeight: pathname === to ? 600 : 400,
-                color: pathname === to ? '#0f0f1a' : '#888',
+                color: pathname === to ? '#16334a' : '#888',
                 textDecoration: 'none', padding: '6px 12px', borderRadius: '7px',
                 background: pathname === to ? 'rgba(0,0,0,0.05)' : 'transparent',
               }}>
@@ -61,8 +61,8 @@ export default function PublicLayout({ children }) {
               marginLeft: '8px', fontSize: '13px', fontWeight: 700,
               color: '#fff', textDecoration: 'none',
               padding: '7px 16px', borderRadius: '8px',
-              background: 'linear-gradient(135deg, #00c896, #6c63ff)',
-              boxShadow: '0 3px 10px rgba(108,99,255,0.3)',
+              background: '#173d5a',
+              boxShadow: '0 3px 10px rgba(23,61,90,0.3)',
             }}>
               Sign In
             </Link>

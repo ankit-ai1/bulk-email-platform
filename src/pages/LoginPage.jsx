@@ -4,17 +4,17 @@ import { useAuth } from '../hooks/useAuth'
 import { useNavigate, Link } from 'react-router-dom'
 import toast from 'react-hot-toast'
 import { Eye, EyeOff, ArrowRight, ArrowLeft, Mail, Lock, User, Globe } from 'lucide-react'
-import { LOGO_URL } from '../lib/logo'
+import { BrandLockup } from '../components/shared/Brand'
 
 const REMEMBER_KEY = 'mailrax_remembered_email'
 
 /* Homepage primary colors */
-const TEAL   = '#00c896'
-const PURPLE = '#6c63ff'
+const TEAL   = '#3f7492'
+const PURPLE = '#173d5a'
 const CTA_GRAD = `linear-gradient(135deg, ${TEAL}, ${PURPLE})`
 
 export default function LoginPage() {
-  const { signIn, signUp } = useAuth()
+  const { signIn } = useAuth()
   const navigate = useNavigate()
 
   const [mode, setMode] = useState('login')
@@ -23,7 +23,6 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false)
   const [form, setForm] = useState({ email: '', password: '', fullName: '' })
   const [forgotSent, setForgotSent] = useState(false)
-  const [signupEmail, setSignupEmail] = useState(null)
 
   useEffect(() => {
     const saved = localStorage.getItem(REMEMBER_KEY)
@@ -33,18 +32,11 @@ export default function LoginPage() {
   async function handleSubmit(e) {
     e.preventDefault(); setLoading(true)
     try {
-      if (mode === 'login') {
-        const { error } = await signIn(form.email, form.password)
-        if (error) throw error
-        if (rememberMe) localStorage.setItem(REMEMBER_KEY, form.email)
-        else localStorage.removeItem(REMEMBER_KEY)
-        toast.success('Welcome back!'); navigate('/')
-      } else {
-        const { error } = await signUp(form.email, form.password, form.fullName)
-        if (error) throw error
-        toast.success('Account created! Check your email to verify.')
-        setSignupEmail(form.email); setForm({ email: '', password: '', fullName: '' })
-      }
+      const { error } = await signIn(form.email, form.password)
+      if (error) throw error
+      if (rememberMe) localStorage.setItem(REMEMBER_KEY, form.email)
+      else localStorage.removeItem(REMEMBER_KEY)
+      toast.success('Welcome back!'); navigate('/')
     } catch (err) { toast.error(err.message || 'Something went wrong') }
     finally { setLoading(false) }
   }
@@ -63,7 +55,7 @@ export default function LoginPage() {
     finally { setLoading(false) }
   }
 
-  function switchMode(m) { setMode(m); setForgotSent(false); setSignupEmail(null) }
+  function switchMode(m) { setMode(m); setForgotSent(false) }
 
   return (
     <div style={{
@@ -95,7 +87,7 @@ export default function LoginPage() {
         .login-input::placeholder { color: #9ca3af; }
         .login-input:focus {
           border-color: ${PURPLE};
-          box-shadow: 0 0 0 3px rgba(108,99,255,0.14);
+          box-shadow: 0 0 0 3px rgba(23,61,90,0.14);
         }
         .login-input.no-icon { padding-left: 20px; }
         .login-input.with-icon { padding-left: 50px; }
@@ -122,7 +114,7 @@ export default function LoginPage() {
         {/* Cool blue-teal radial glow — matches homepage dark CTA section */}
         <div style={{
           position: 'absolute', inset: 0, pointerEvents: 'none',
-          background: 'radial-gradient(ellipse 80% 55% at 25% 35%, rgba(108,99,255,0.28) 0%, rgba(0,200,150,0.12) 48%, #080b12 100%)',
+          background: 'radial-gradient(ellipse 80% 55% at 25% 35%, rgba(23,61,90,0.28) 0%, rgba(63,116,146,0.12) 48%, #080b12 100%)',
         }} />
         {/* Subtle grid dots */}
         <div style={{
@@ -134,7 +126,7 @@ export default function LoginPage() {
         <div style={{
           position: 'absolute', bottom: '-80px', right: '-60px', pointerEvents: 'none',
           width: '320px', height: '320px', borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(0,200,150,0.15), transparent 70%)',
+          background: 'radial-gradient(circle, rgba(63,116,146,0.15), transparent 70%)',
         }} />
 
         {/* TOP: tagline */}
@@ -171,15 +163,15 @@ export default function LoginPage() {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '48px' }}>
             {[
-              '2.4M+ emails delivered daily',
-              'Real-time open & click analytics',
-              'GDPR, CAN-SPAM & CASL compliant',
+              'Campaigns, inbox and automation in one place',
+              'Delivery, click and reply analytics',
+              'Unsubscribe and suppression built in',
             ].map((text, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <div style={{
                   width: '20px', height: '20px', borderRadius: '50%', flexShrink: 0,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  background: 'rgba(0,200,150,0.18)', border: '1px solid rgba(0,200,150,0.38)',
+                  background: 'rgba(63,116,146,0.18)', border: '1px solid rgba(63,116,146,0.38)',
                 }}>
                   <div style={{ width: '7px', height: '7px', borderRadius: '50%', background: TEAL }} />
                 </div>
@@ -265,21 +257,15 @@ export default function LoginPage() {
           borderBottom: '1px solid rgba(0,0,0,0.07)',
         }}>
           <Link to="/" style={{ textDecoration: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <img src={LOGO_URL} alt="MailRax" style={{ height: '36px', width: 'auto', objectFit: 'contain' }} />
-            <span style={{
-              fontFamily: 'var(--font-display)', fontWeight: 800, fontSize: '18px',
-              color: '#0f0f1a', fontVariationSettings: 'normal',
-            }}>
-              MailRax
-            </span>
+            <BrandLockup />
           </Link>
 
           {mode === 'login' && (
-            <button onClick={() => switchMode('signup')} style={topLinkStyle}>
-              <User size={14} /> Sign Up
-            </button>
+            <Link to="/apply" style={{ ...topLinkStyle, textDecoration: 'none' }}>
+              <User size={14} /> Request access
+            </Link>
           )}
-          {(mode === 'signup' || mode === 'forgot') && (
+          {mode === 'forgot' && (
             <button onClick={() => switchMode('login')} style={topLinkStyle}>
               <ArrowLeft size={14} /> Sign In
             </button>
@@ -307,10 +293,10 @@ export default function LoginPage() {
 
               {forgotSent ? (
                 <div style={{ textAlign: 'center', paddingTop: '24px' }}>
-                  <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(0,200,150,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                  <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(63,116,146,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
                     <Mail size={26} color={TEAL} />
                   </div>
-                  <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '20px', color: '#0f0f1a', marginBottom: '8px', fontVariationSettings: 'normal' }}>
+                  <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '20px', color: '#16334a', marginBottom: '8px', fontVariationSettings: 'normal' }}>
                     Check your inbox
                   </h3>
                   <p style={{ color: '#6b7280', fontSize: '14px', marginBottom: '28px', fontFamily: 'var(--font-body)' }}>
@@ -335,43 +321,16 @@ export default function LoginPage() {
           )}
 
           {/* ── SIGNUP SUCCESS ── */}
-          {signupEmail && (
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ width: '60px', height: '60px', borderRadius: '50%', background: 'rgba(0,200,150,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-                <Mail size={26} color={TEAL} />
-              </div>
-              <h3 style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: '22px', color: '#0f0f1a', marginBottom: '8px', fontVariationSettings: 'normal' }}>
-                Check your inbox
-              </h3>
-              <p style={{ color: '#6b7280', fontSize: '15px', marginBottom: '28px', fontFamily: 'var(--font-body)' }}>
-                Verification link sent to <strong style={{ color: '#374151' }}>{signupEmail}</strong>
-              </p>
-              <button
-                type="button"
-                onClick={() => setSignupEmail(null)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: PURPLE, fontSize: '14px', fontWeight: 700, fontFamily: 'var(--font-body)' }}
-              >
-                Already verified? Sign in →
-              </button>
-            </div>
-          )}
-
-          {/* ── LOGIN / SIGNUP ── */}
-          {mode !== 'forgot' && !signupEmail && (
+          {mode !== 'forgot' && (
             <>
-              <h2 style={headingStyle}>{mode === 'login' ? 'Sign In' : 'Create account'}</h2>
+              <h2 style={headingStyle}>Sign In</h2>
               <p style={subStyle}>
-                {mode === 'login' ? 'Welcome back to your campaign dashboard' : 'Get started with MailRax today'}
+                Welcome back to your campaign dashboard
               </p>
 
               <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
 
-                {mode === 'signup' && (
-                  <PillInput type="text" placeholder="Full name" value={form.fullName || ''}
-                    onChange={e => setForm({ ...form, fullName: e.target.value })}
-                    icon={<User size={16} color="#9ca3af" />} required />
-                )}
-
+                
                 <PillInput type="email" placeholder="Email address" value={form.email}
                   onChange={e => setForm({ ...form, email: e.target.value })}
                   icon={<Mail size={16} color="#9ca3af" />} required />
@@ -432,7 +391,7 @@ export default function LoginPage() {
                   </div>
                 )}
 
-                <ActionButton loading={loading} label={mode === 'login' ? 'Sign In' : 'Create Account'} />
+                <ActionButton loading={loading} label="Sign In" />
               </form>
             </>
           )}
@@ -444,7 +403,7 @@ export default function LoginPage() {
           padding: '0 52px 28px',
         }}>
           <p style={{ fontSize: '12px', color: '#9ca3af', fontFamily: 'var(--font-body)' }}>
-            © {new Date().getFullYear()} MailRax Inc.
+            © {new Date().getFullYear()} Synerax
           </p>
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
             <Link to="/contact" style={{ fontSize: '12px', color: '#9ca3af', textDecoration: 'none', fontFamily: 'var(--font-body)', transition: 'color 0.15s' }}>
@@ -499,7 +458,7 @@ function ActionButton({ loading, label }) {
         fontWeight: 700,
         fontSize: '16px',
         cursor: loading ? 'not-allowed' : 'pointer',
-        boxShadow: loading ? 'none' : '0 8px 28px rgba(108,99,255,0.32)',
+        boxShadow: loading ? 'none' : '0 8px 28px rgba(23,61,90,0.32)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',

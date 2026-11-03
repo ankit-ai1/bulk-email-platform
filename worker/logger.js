@@ -12,15 +12,17 @@ export const supabase = createClient(
 /**
  * Insert a row into email_logs for a single sent email.
  */
-export async function logEmail({ userId, campaignId, email, recipientName, status, errorMessage, messageId }) {
+export async function logEmail({ userId, orgId, campaignId, email, recipientName, status, errorMessage, messageId, smtpAccountId }) {
   const { error } = await supabase.from('email_logs').insert({
     user_id: userId,
+    org_id: orgId,
     campaign_id: campaignId,
     email,
     recipient_name: recipientName || null,
     status,
     error_message: errorMessage || null,
     message_id: messageId || null,
+    smtp_account_id: smtpAccountId || null,
   });
 
   if (error) {
@@ -59,4 +61,14 @@ export async function updateCampaignStatus(campaignId, status) {
   if (error) {
     console.error(`[Logger] Failed to update status for campaign ${campaignId}:`, error.message);
   }
+}
+
+/** Audit row for worker actions, which the browser-side trigger cannot see. */
+export async function audit(ctx, action, entity, entityId, detail = {}) {
+  await supabase.from('audit_logs').insert({
+    org_id: detail.org_id ?? ctx.profile?.org_id ?? null,
+    actor_id: ctx.user?.id ?? null,
+    actor_email: ctx.user?.email ?? null,
+    action, entity, entity_id: entityId ? String(entityId) : null, detail, ip: ctx.ip ?? null,
+  });
 }
