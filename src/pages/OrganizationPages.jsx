@@ -11,55 +11,80 @@ const date = v => (v ? format(new Date(v), 'MMM d, yyyy') : '—')
 const stamp = v => (v ? format(new Date(v), 'MMM d, HH:mm') : 'Never')
 
 // ── Domains & SMTP ───────────────────────────────────────────────────────────
-const EMPTY_SMTP = { label: '', provider: 'custom', host: '', port: 587, secure: false, username: '', password: '', from_name: '', from_email: '', hourly_limit: 100, daily_limit: 500, monthly_limit: 10000 }
+const EMPTY_SMTP = { label: '', provider: 'gmail', host: 'smtp.gmail.com', port: 587, secure: false, username: '', password: '', from_name: '', from_email: '', hourly_limit: 100, daily_limit: 500, monthly_limit: 10000 }
+// `login` is the username a provider expects: the sender email, a fixed value, or one the user must type.
 const PROVIDERS = {
-  custom: {}, gmail: { host: 'smtp.gmail.com', port: 587, secure: false, daily_limit: 500 }, outlook: { host: 'smtp.office365.com', port: 587, secure: false, daily_limit: 500 },
-  ses: { host: 'email-smtp.us-east-1.amazonaws.com', port: 587, secure: false }, sendgrid: { host: 'smtp.sendgrid.net', port: 587, secure: false, username: 'apikey' },
+  gmail: { name: 'Google / Gmail', host: 'smtp.gmail.com', port: 587, secure: false, daily_limit: 500, login: 'email', secret: 'App password' },
+  outlook: { name: 'Microsoft 365 / Outlook', host: 'smtp.office365.com', port: 587, secure: false, daily_limit: 500, login: 'email', secret: 'App password' },
+  ses: { name: 'Amazon SES', host: 'email-smtp.us-east-1.amazonaws.com', port: 587, secure: false, login: 'ask', secret: 'SMTP password' },
+  sendgrid: { name: 'SendGrid', host: 'smtp.sendgrid.net', port: 587, secure: false, login: 'apikey', secret: 'API key' },
+  custom: { name: 'Other (custom SMTP)', host: '', port: 587, secure: false, login: 'email', secret: 'Password' },
 }
+const linkStyle = { background: 'none', border: 0, padding: 0, cursor: 'pointer', textAlign: 'left', textDecoration: 'underline' }
 
 function SmtpForm({ account, onClose, onSaved }) {
   const [form, setForm] = useState(account ? { ...account, password: '' } : EMPTY_SMTP)
+  const [more, setMore] = useState(false)
   const [busy, setBusy] = useState(false)
   const set = k => e => setForm(f => ({ ...f, [k]: e.target.type === 'number' ? Number(e.target.value) : e.target.value }))
+  const p = PROVIDERS[form.provider] || PROVIDERS.custom
+  function pickProvider(e) {
+    const { name, login, secret, ...defaults } = PROVIDERS[e.target.value]
+    setForm(f => ({ ...f, provider: e.target.value, ...defaults, username: '' }))
+  }
   async function submit(e) {
     e.preventDefault()
     setBusy(true)
     const { id, org_id, status, consecutive_failures, last_error, last_tested_at, created_by, created_at, ...body } = form
+    // Fields most people never change are derived instead of asked for.
+    body.label = body.label.trim() || body.from_email
+    if (!body.username) body.username = p.login === 'apikey' ? 'apikey' : body.from_email
+    body.secure = Number(body.port) === 465 ? true : body.secure
     if (account && !body.password) delete body.password
     const ok = await attempt(() => (account ? api(`/api/smtp/${account.id}`, { method: 'PATCH', body }) : api('/api/smtp', { body })), 'SMTP account saved')
     setBusy(false)
     if (ok) onSaved(ok)
   }
   return (
-    <Modal title={account ? `Edit ${account.label}` : 'Add SMTP account'} onClose={onClose} width={640}>
+    <Modal title={account ? `Edit ${account.label}` : 'Add SMTP account'} onClose={onClose} width={560}>
       <form className="ui-form" onSubmit={submit}>
-        <Row>
-          <Field label="Label *"><input className="input" value={form.label} onChange={set('label')} required /></Field>
-          <Field label="Provider">
-            <select className="input" value={form.provider} onChange={e => setForm(f => ({ ...f, provider: e.target.value, ...PROVIDERS[e.target.value] }))}>
-              <option value="custom">Custom SMTP</option><option value="gmail">Google Workspace</option><option value="outlook">Microsoft 365</option><option value="ses">Amazon SES</option><option value="sendgrid">SendGrid</option>
-            </select>
-          </Field>
-        </Row>
-        <Row>
-          <Field label="Host *"><input className="input" value={form.host} onChange={set('host')} required /></Field>
-          <Field label="Port *"><input className="input" type="number" value={form.port} onChange={set('port')} required /></Field>
-        </Row>
-        <label className="ui-check"><input type="checkbox" checked={form.secure} onChange={e => setForm(f => ({ ...f, secure: e.target.checked }))} />Use implicit TLS (usually port 465). STARTTLS is required otherwise.</label>
-        <Row>
-          <Field label="Username *"><input className="input" value={form.username} onChange={set('username')} required autoComplete="off" /></Field>
-          <Field label={account ? 'New password' : 'Password *'} hint="Encrypted before storage and never shown again."><input className="input" type="password" value={form.password} onChange={set('password')} required={!account} autoComplete="new-password" /></Field>
-        </Row>
-        <Row>
-          <Field label="Sender name"><input className="input" value={form.from_name || ''} onChange={set('from_name')} /></Field>
-          <Field label="Sender email *"><input className="input" type="email" value={form.from_email} onChange={set('from_email')} required /></Field>
-        </Row>
-        <Row>
-          <Field label="Hourly limit"><input className="input" type="number" min="1" value={form.hourly_limit} onChange={set('hourly_limit')} /></Field>
-          <Field label="Daily quota"><input className="input" type="number" min="1" value={form.daily_limit} onChange={set('daily_limit')} /></Field>
-          <Field label="Monthly quota"><input className="input" type="number" min="1" value={form.monthly_limit} onChange={set('monthly_limit')} /></Field>
-        </Row>
-        <p className="ui-hint">Set these at or below your provider's real limits. Synerax Mail never sends past them.</p>
+        <Field label="Provider">
+          <select className="input" value={form.provider in PROVIDERS ? form.provider : 'custom'} onChange={pickProvider}>
+            {Object.entries(PROVIDERS).map(([key, v]) => <option key={key} value={key}>{v.name}</option>)}
+          </select>
+        </Field>
+        <Field label="Email *"><input className="input" type="email" placeholder="you@company.com" value={form.from_email} onChange={set('from_email')} required /></Field>
+        {p.login === 'ask' && <Field label="SMTP username *"><input className="input" value={form.username} onChange={set('username')} required autoComplete="off" /></Field>}
+        <Field label={account ? `New ${p.secret.toLowerCase()}` : `${p.secret} *`} hint={account ? 'Leave blank to keep the current one.' : 'Encrypted before storage and never shown again.'}>
+          <input className="input" type="password" value={form.password} onChange={set('password')} required={!account} autoComplete="new-password" />
+        </Field>
+        {form.provider === 'custom' && (
+          <Row>
+            <Field label="SMTP host *"><input className="input" placeholder="smtp.yourdomain.com" value={form.host} onChange={set('host')} required /></Field>
+            <Field label="Port *"><input className="input" type="number" value={form.port} onChange={set('port')} required /></Field>
+          </Row>
+        )}
+        <Field label="Sender name" hint="Shown to recipients, for example your company name."><input className="input" value={form.from_name || ''} onChange={set('from_name')} /></Field>
+        <button type="button" className="ui-hint" style={linkStyle} onClick={() => setMore(m => !m)}>{more ? 'Hide more settings' : 'More settings (label, login, sending limits)'}</button>
+        {more && <>
+          <Row>
+            <Field label="Label"><input className="input" placeholder="Same as the email" value={form.label} onChange={set('label')} /></Field>
+            {p.login === 'email' && <Field label="Login username"><input className="input" placeholder="Same as the email" value={form.username} onChange={set('username')} autoComplete="off" /></Field>}
+          </Row>
+          {form.provider !== 'custom' && (
+            <Row>
+              <Field label="SMTP host"><input className="input" value={form.host} onChange={set('host')} required /></Field>
+              <Field label="Port"><input className="input" type="number" value={form.port} onChange={set('port')} required /></Field>
+            </Row>
+          )}
+          <label className="ui-check"><input type="checkbox" checked={form.secure} onChange={e => setForm(f => ({ ...f, secure: e.target.checked }))} />Use implicit TLS (usually port 465). STARTTLS is required otherwise.</label>
+          <Row>
+            <Field label="Hourly limit"><input className="input" type="number" min="1" value={form.hourly_limit} onChange={set('hourly_limit')} /></Field>
+            <Field label="Daily quota"><input className="input" type="number" min="1" value={form.daily_limit} onChange={set('daily_limit')} /></Field>
+            <Field label="Monthly quota"><input className="input" type="number" min="1" value={form.monthly_limit} onChange={set('monthly_limit')} /></Field>
+          </Row>
+          <p className="ui-hint">Set these at or below your provider's real limits. Synerax Mail never sends past them.</p>
+        </>}
         <div className="ui-form-actions"><button type="button" className="btn btn-secondary" onClick={onClose}>Cancel</button><button className="btn btn-primary" disabled={busy}>{busy ? 'Saving…' : 'Save account'}</button></div>
       </form>
     </Modal>

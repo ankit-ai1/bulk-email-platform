@@ -60,12 +60,14 @@ function Compose({ mailboxes, initial, onClose, onSent }) {
 }
 
 function ConnectMailbox({ onClose, onDone, smtp }) {
-  const [form, setForm] = useState({ label: '', email: '', imap_host: '', imap_port: 993, imap_secure: true, username: '', password: '', smtp_account_id: '' })
+  // Blank fields are filled by the worker from the chosen SMTP account (same email, login and app password).
+  const [form, setForm] = useState({ label: '', email: '', imap_host: '', imap_port: 993, username: '', password: '', smtp_account_id: smtp[0]?.id || '' })
+  const [more, setMore] = useState(smtp.length === 0)
   const [busy, setBusy] = useState(false)
   const set = k => e => setForm(f => ({ ...f, [k]: e.target.value }))
+  const linked = Boolean(form.smtp_account_id)
   return (
-    <Modal title="Connect a mailbox" onClose={onClose} width={600}>
-      <p className="ui-note">SMTP only sends, so incoming mail needs IMAP. Google and Microsoft accounts need IMAP enabled and an app password. Direct Gmail API and Microsoft Graph sign-in aren't available yet.</p>
+    <Modal title="Connect a mailbox" onClose={onClose} width={560}>
       <form className="ui-form" onSubmit={async e => {
         e.preventDefault()
         setBusy(true)
@@ -73,10 +75,18 @@ function ConnectMailbox({ onClose, onDone, smtp }) {
         setBusy(false)
         if (ok) onDone()
       }}>
-        <Row><Field label="Label"><input className="input" value={form.label} onChange={set('label')} /></Field><Field label="Email *"><input className="input" type="email" value={form.email} onChange={set('email')} required /></Field></Row>
-        <Row><Field label="IMAP host *"><input className="input" placeholder="imap.gmail.com" value={form.imap_host} onChange={set('imap_host')} required /></Field><Field label="Port"><input className="input" type="number" value={form.imap_port} onChange={set('imap_port')} /></Field></Row>
-        <Row><Field label="Username *"><input className="input" autoComplete="off" value={form.username} onChange={set('username')} required /></Field><Field label="Password *" hint="Encrypted; never shown again."><input className="input" type="password" autoComplete="new-password" value={form.password} onChange={set('password')} required /></Field></Row>
-        <Field label="Send replies through" hint="Without one, this mailbox is read-only."><select className="input" value={form.smtp_account_id} onChange={set('smtp_account_id')}><option value="">None</option>{smtp.map(a => <option key={a.id} value={a.id}>{a.label} ({a.from_email})</option>)}</select></Field>
+        {smtp.length > 0
+          ? <Field label="Email account *" hint="Replies are sent from this account, and its inbox is brought here."><select className="input" value={form.smtp_account_id} onChange={set('smtp_account_id')} required>{smtp.map(a => <option key={a.id} value={a.id}>{a.label} ({a.from_email})</option>)}</select></Field>
+          : <p className="ui-note">Add an SMTP account first so you can reply from this inbox. Without one, the mailbox is read-only.</p>}
+        <Field label={linked ? 'Password' : 'Password *'} hint={linked ? 'Leave blank to use the same app password as the account above.' : 'For Google and Microsoft, use an app password with IMAP enabled.'}>
+          <input className="input" type="password" autoComplete="new-password" value={form.password} onChange={set('password')} required={!linked} />
+        </Field>
+        <button type="button" className="ui-hint" style={{ background: 'none', border: 0, padding: 0, cursor: 'pointer', textAlign: 'left', textDecoration: 'underline' }} onClick={() => setMore(m => !m)}>{more ? 'Hide more settings' : 'More settings'}</button>
+        {more && <>
+          <Row><Field label={linked ? 'Email' : 'Email *'}><input className="input" type="email" placeholder={linked ? 'Same as the account' : ''} value={form.email} onChange={set('email')} required={!linked} /></Field><Field label="Label"><input className="input" placeholder="Same as the email" value={form.label} onChange={set('label')} /></Field></Row>
+          <Row><Field label={linked ? 'IMAP host' : 'IMAP host *'}><input className="input" placeholder={linked ? 'Detected automatically' : 'imap.gmail.com'} value={form.imap_host} onChange={set('imap_host')} required={!linked} /></Field><Field label="Port"><input className="input" type="number" value={form.imap_port} onChange={set('imap_port')} /></Field></Row>
+          <Field label={linked ? 'Username' : 'Username *'}><input className="input" autoComplete="off" placeholder={linked ? 'Same as the account' : ''} value={form.username} onChange={set('username')} required={!linked} /></Field>
+        </>}
         <div className="ui-form-actions"><button className="btn btn-primary" disabled={busy}>{busy ? 'Connecting…' : 'Test & connect'}</button></div>
       </form>
     </Modal>
@@ -97,7 +107,7 @@ export default function InboxPage() {
   const boxes = useLoad(async () => {
     const [mailboxes, smtp] = await Promise.all([
       supabase.from('mailboxes').select('*').order('created_at'),
-      isClientAdmin ? supabase.from('smtp_accounts').select('id, label, from_email') : { data: [] },
+      isClientAdmin ? supabase.from('smtp_accounts').select('id, label, from_email').order('created_at') : { data: [] },
     ])
     return { mailboxes: unwrap(mailboxes), smtp: unwrap(smtp) }
   })
