@@ -508,7 +508,19 @@ async function inboxSend(ctx) {
   if (recipients.length === 0 || !recipients.every(isEmail)) fail(400, 'Enter valid recipients');
   if (JSON.stringify(attachments || []).length > 14_000_000) fail(413, 'Attachments are limited to about 10 MB');
   if (!rateLimit(`inbox:${ctx.profile.org_id}`, 200, 3600_000)) fail(429, 'Hourly inbox sending limit reached');
-  const sent = await sendFromMailbox(mailbox, { to: recipients, cc, subject, html, text, inReplyTo: in_reply_to, references, attachments });
+  let sent;
+  try {
+    sent = await sendFromMailbox(mailbox, { to: recipients, cc, subject, html, text, inReplyTo: in_reply_to, references, attachments });
+  } catch (err) {
+    if (err.status) throw err;
+    console.error(`[INBOX] send from mailbox ${mailbox.id} failed:`, err);
+    // SMTP and setup failures are the user's to fix, so show the real reason instead of a generic 500.
+    if (/Link an SMTP account/.test(err.message)) fail(400, err.message);
+    if (err.code === 'EAUTH') fail(400, 'The SMTP server rejected the login. Check the SMTP username and app password.');
+    if (['ECONNECTION', 'ETIMEDOUT', 'ESOCKET', 'EDNS'].includes(err.code)) fail(502, `Could not connect to the SMTP server (${err.code}). Check the host and port.`);
+    if (err.responseCode || err.code === 'EENVELOPE') fail(502, `The SMTP server refused the message: ${String(err.response || err.message).slice(0, 200)}`);
+    throw err;
+  }
   if (draft_id) await supabase.from('mail_messages').delete().eq('id', draft_id).eq('org_id', ctx.profile.org_id).eq('folder', 'drafts');
   return sent;
 }
@@ -746,7 +758,8 @@ export async function handleRequest(req, res) {
   } catch (err) {
     const status = err.status || (/not allowed|Could not resolve|Host is required/.test(err.message) ? 400 : 500);
     if (status >= 500) console.error(`[HTTP] ${req.method} ${path}:`, err);
-    return json(res, status, { error: status >= 500 ? 'Something went wrong' : err.message });
+    // Only unexpected crashes are hidden; messages raised on purpose with fail() are shown.
+    return json(res, status, { error: status >= 500 && !err.status ? 'Something went wrong' : err.message });
   }
 }
 

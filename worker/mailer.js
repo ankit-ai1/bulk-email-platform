@@ -60,7 +60,7 @@ export function prepareHtml(html, { token, organization, trackOpens = true, trac
   const sender = [organization?.brand_name || organization?.name, organization?.address].filter(Boolean).join(' · ');
   const footer = `<div style="margin-top:32px;padding-top:16px;border-top:1px solid #e5e7eb;font-size:12px;line-height:1.5;color:#6b7280;">`
     + `${escapeAttr(sender)}<br><a href="${base}/u/${token}" style="color:#6b7280;">Unsubscribe</a> from these emails.</div>`;
-  const pixel = trackOpens ? `<img src="${base}/t/o/${token}.gif" width="1" height="1" alt="" style="display:none;">` : '';
+  const pixel = trackOpens ? `<img src="${base}/t/o/${token}.gif" width="1" height="1" alt="" border="0" style="display:block;width:1px;height:1px;border:0;">` : '';
   return /<\/body>/i.test(out) ? out.replace(/<\/body>/i, `${footer}${pixel}</body>`) : `${out}${footer}${pixel}`;
 }
 
